@@ -1,36 +1,138 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 InterviewVault
 
-## Getting Started
+InterviewVault is a modern interview preparation and management platform built using **Next.js** (with plans to extend into a full **MERN + Next.js** stack). It helps users organize, practice, and track their interview preparation efficiently.
 
-First, run the development server:
+---
+
+## 📌 Current Status
+
+✅ Frontend built using **Next.js (App Router)**
+✅ Component-based architecture
+✅ Responsive UI with modern design
+🚧 Backend (MERN) integration in progress
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+* Next.js (App Router)
+* React.js
+* Tailwind CSS
+* TypeScript
+
+### Backend (Planned)
+
+* Node.js
+* Express.js
+* MongoDB
+
+---
+
+## 📂 Project Structure
+
+```
+interviewvault/
+│── app/                # Next.js App Router pages
+│── components/         # Reusable UI components
+│── public/             # Static assets
+│── styles/             # Global styles
+│── next.config.ts      # Next.js config
+│── tsconfig.json       # TypeScript config
+```
+
+---
+
+## ✨ Features (Current)
+
+* Clean and responsive UI
+* Modular component architecture
+* Dashboard layout (in progress)
+* Reusable UI components
+
+---
+
+## 🔮 Upcoming Features
+
+* User Authentication (JWT)
+* Interview Question Bank
+* AI-based Interview Practice
+* Progress Tracking Dashboard
+* Notes & Bookmarking System
+* Full MERN Backend Integration
+
+---
+
+## ⚙️ Installation & Setup
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/unaib-saiyad/interviewvault.git
+```
+
+2. Navigate to the project:
+
+```bash
+cd interviewvault
+```
+
+3. Install dependencies:
+
+```bash
+npm install
+```
+
+4. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open in browser:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🚀 Deployment
 
-To learn more about Next.js, take a look at the following resources:
+You can deploy this project easily using **Vercel**:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🤝 Contribution
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Contributions are welcome! Feel free to fork the repo and submit a pull request.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 📧 Contact
+
+If you have any questions or suggestions, feel free to reach out.
+Owner 1: Unaib Saiyad
+email: unaibsaiyad18@gmail.com
+
+Owner 2: Rushwan Sayyad
+email: rushdeveloper07@gmail.com
+---
+
+## ⭐ Future Vision
+
+InterviewVault aims to become a complete platform for:
+
+* Interview preparation
+* Real-time mock interviews
+* AI-driven feedback
+* Developer-focused learning system
+
+---
+
+> Built with ❤️ using Next.js — evolving into a full MERN stack application.
