@@ -98,11 +98,11 @@ export default function DashboardPage() {
       <div className="space-y-8">
         {/* Header Section */}
         <div className="flex flex-col gap-6 lg:gap-8">
-            <div className="max-w-2xl">
-                <h1 className="text-3xl lg:text-4xl font-black text-slate-900 leading-tight mb-2">Welcome back!</h1>
-                <p className="text-base text-slate-600">Here's your current progress on interview preparation.</p>
-            </div>
-            
+          <div className="max-w-2xl">
+            <h1 className="text-3xl lg:text-4xl font-black text-slate-900 leading-tight mb-2">Welcome back!</h1>
+            <p className="text-base text-slate-600">Here's your current progress on interview preparation.</p>
+          </div>
+
           {/* Quick Actions */}
           <div className="flex flex-wrap gap-3">
             <button className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-brand-700 hover:shadow-lg active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
@@ -167,11 +167,10 @@ export default function DashboardPage() {
                   {weakTopics.map((topic, index) => (
                     <div key={index} className="flex items-center justify-between p-3.5 rounded-lg border border-slate-200 bg-slate-50/60 hover:bg-slate-100 transition-colors duration-200">
                       <span className="text-sm font-medium text-slate-900">{topic.name}</span>
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-colors duration-200 ${
-                        topic.level === 'Weak'
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-colors duration-200 ${topic.level === 'Weak'
                           ? 'bg-red-100 text-red-700'
                           : 'bg-amber-100 text-amber-700'
-                      }`}>
+                        }`}>
                         {topic.level}
                       </span>
                     </div>
@@ -259,11 +258,10 @@ export default function DashboardPage() {
                         <p className="text-sm font-medium text-slate-900">{task.title}</p>
                         <p className="text-xs text-slate-500 mt-1">Due: {task.dueDate}</p>
                       </div>
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-colors duration-200 ${
-                        task.status === 'completed'
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-colors duration-200 ${task.status === 'completed'
                           ? 'bg-green-100 text-green-700'
                           : 'bg-amber-100 text-amber-700'
-                      }`}>
+                        }`}>
                         {task.status}
                       </span>
                     </div>
