@@ -41,13 +41,13 @@ export default function Navbar() {
 
         <div className="hidden items-center gap-3 md:flex">
           <Link
-            href="/login"
+            href="/auth/login"
             className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition duration-200 hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           >
             Login
           </Link>
           <Link
-            href="/signup"
+            href="/auth/signup"
             className="rounded-full bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           >
             Get Started
@@ -82,14 +82,14 @@ export default function Navbar() {
             </a>
           ))}
           <Link
-            href="/login"
+            href="/auth/login"
             className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition duration-200 hover:border-slate-300 hover:bg-slate-50"
             onClick={() => setOpen(false)}
           >
             Login
           </Link>
           <Link
-            href="/signup"
+            href="/auth/signup"
             className="rounded-full bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-brand-700"
             onClick={() => setOpen(false)}
           >

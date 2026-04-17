@@ -32,12 +32,12 @@ export default function Footer() {
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Company</p>
               <ul className="mt-4 space-y-3 text-sm text-slate-600">
                 <li>
-                  <Link href="#footer" className="transition hover:text-slate-900">
+                  <Link href="/auth/login" className="transition hover:text-slate-900">
                     Login
                   </Link>
                 </li>
                 <li>
-                  <Link href="#get-started" className="transition hover:text-slate-900">
+                  <Link href="/auth/signup" className="transition hover:text-slate-900">
                     Get Started
                   </Link>
                 </li>
