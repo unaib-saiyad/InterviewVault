@@ -1,15 +1,17 @@
 type InputFieldProps = {
-  label: string;
+  name: string;
+  label?: string;
   type?: string;
   placeholder?: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: React.ChangeEvent<HTMLInputElement>) => void;
   error?: string;
   disabled?: boolean;
   autoComplete?: string;
 };
 
 export function InputField({
+  name,
   label,
   type = 'text',
   placeholder,
@@ -23,10 +25,11 @@ export function InputField({
     <div className="flex flex-col gap-2.5">
       <label className="text-sm font-semibold text-slate-900">{label}</label>
       <input
+        name={name}
         type={type}
         placeholder={placeholder}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(e)}
         disabled={disabled}
         autoComplete={autoComplete}
         className={`rounded-lg border px-4 py-3 text-sm transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
