@@ -9,6 +9,8 @@ import { SubmitButton } from '@/components/auth/SubmitButton';
 import { FormError } from '@/components/auth/FormError';
 import { validatePassword } from '@/lib/validations';
 import api from '@/lib/api';
+import { ApiError } from '@/types/apiTypes';
+import { ins } from 'framer-motion/client';
 
 export default function SignupForm() {
     const router = useRouter();
@@ -62,11 +64,12 @@ export default function SignupForm() {
             router.push('/auth/login?registered=true');
         }
         catch(error: unknown){
-            if(typeof error === 'string'){
-                setError(error);
+            if(error instanceof Error){
+                setError('Registration failed. Please check your details and try again.');
             }
             else{
-                setError('Registration failed. Please try again.');
+                const err = error as ApiError
+                setError(err.message|| 'Registration failed. Please check your details and try again.');
             }
         }
 
@@ -121,7 +124,7 @@ export default function SignupForm() {
                 autoComplete="new-password"
             />
 
-            <div className="flex items-start gap-2.5">
+            {/* <div className="flex items-start gap-2.5">
                 <input
                     type="checkbox"
                     id="terms"
@@ -138,7 +141,7 @@ export default function SignupForm() {
                         Privacy Policy
                     </Link>
                 </label>
-            </div>
+            </div> */}
 
             <SubmitButton label="Create account" loading={loading} />
 

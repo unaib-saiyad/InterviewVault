@@ -10,3 +10,7 @@ export const loginValidationRules = [
     body('email').isEmail().withMessage('Valid email is required'),
     body('password').notEmpty().withMessage('Password is required')
 ];
+
+export const resendVerificationEmailValidationRules = [
+    body('email').isEmail().withMessage('Valid email is required')
+];

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ApiError } from "@/types/apiTypes";
 
 const api = axios.create({
 //   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
@@ -18,28 +19,29 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error)=>{
-    let message = "Something went wrong.";
-    if(error.response?.status === 401){
+    const originalRequest = error.config;
+
+    if(error.response?.status === 401 && !originalRequest._retry){
+      originalRequest._retry = true;
       try{
-        const res = await axios.post('/api/auth/refresh-token', { withCredentials: true });
+        const res = await axios.post('/api/auth/refresh-token', {}, { withCredentials: true });
         localStorage.setItem("accessToken", res.data.accessToken);
 
-        error.config.headers.Authorization = `Bearer ${res.data.accessToken}`;
+        originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
 
-        return axios(error.config);
+        return axios(originalRequest);
       }
       catch(error){
         localStorage.removeItem("accessToken");
         window.location.href = 'auth/login?sessionExpired=true';
       }
     }
-    else if(error.response){
-      message = error.response.data.message || message;
-    }
-    else if(error.request){
-      message = "Server not responding. Please try again later.";
-    }
-    return Promise.reject(message);
+    const formatedError: ApiError = {
+      status: error.response?.status,
+      code: error.response?.data?.code,
+      message: error.response?.data?.message || "Something went wrong",
+    };
+    return Promise.reject(formatedError);
   }
 );
 

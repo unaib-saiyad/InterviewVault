@@ -9,6 +9,8 @@ import { SubmitButton } from '@/components/auth/SubmitButton';
 import { FormError } from '@/components/auth/FormError';
 import { FormSuccess } from './FormSuccess';
 import api from '@/lib/api';
+import { ApiError } from '@/types/apiTypes';
+
 type Props = {
     searchParams?: {
         registered?: boolean;
@@ -19,6 +21,7 @@ export default function LoginForm({searchParams}: Props) {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
+        rememberMe: false,
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -26,17 +29,10 @@ export default function LoginForm({searchParams}: Props) {
 
     useEffect(() => {
         if (searchParams?.registered) {
-            setSuccess('Registration successful! Please log in.');
-
-            setTimeout(() => {
-                setSuccess('');
-            }, 5000);
+            setSuccess('A verification email has been sent to your inbox. Please verify your email before logging in.');
         }
         else if(searchParams?.sessionExpired){
             setError('Your session has expired. Please log in again.');
-            setTimeout(() => {
-                setError('');
-            }, 5000);
         }
     }, [searchParams]);
 
@@ -65,7 +61,7 @@ export default function LoginForm({searchParams}: Props) {
         // Simulate API call
         setLoading(true);
         try{
-            const res = await api.post('/auth/login', {email: formData.email, password: formData.password});
+            const res = await api.post('/auth/login', {email: formData.email, password: formData.password, rememberMe: formData.rememberMe});
             if(!res.data?.accessToken){
                 throw new Error('Invalid response from server');
             }
@@ -75,12 +71,19 @@ export default function LoginForm({searchParams}: Props) {
                 window.location.href = '/dashboard';
             }, 2000);
         }
-        catch(error:unknown){
-            if(typeof error === 'string'){
-                setError(error);
+        catch(error){
+            if(error instanceof Error){
+                setError('Login failed. Please check your credentials and try again.');
             }
             else{
-                setError('Login failed. Please check your credentials and try again.');
+                const err = error as ApiError
+                if(err.code==="EMAIL_NOT_VARIFIED"){
+                    await handleResendEmail();
+                    setError('Your email is not verified. Please check your inbox for the verification email.');
+                }
+                else{
+                    setError(err.message|| 'Login failed. Please check your credentials and try again.');
+                }
             }
         }
         finally{
@@ -88,6 +91,28 @@ export default function LoginForm({searchParams}: Props) {
         }
 
     };
+
+    const handleResendEmail = async () => {
+        setLoading(true);
+        try {
+            await api.post('/auth/resend-verification-email', { email: formData.email });
+        }
+        catch (error) {
+            if(error instanceof Error){
+                setError('Something went wrong while resending verification email. Please try again later.');
+            }
+            else{
+                const err = error as ApiError;
+                setError(err.message || 'Something went wrong while resending verification email. Please try again later.');
+            }
+        }
+        finally {
+            setTimeout(() => {
+                setLoading(false);
+            }, 1000);
+        }
+    };
+
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             {error ? <FormError message={error} /> : null}
@@ -118,6 +143,8 @@ export default function LoginForm({searchParams}: Props) {
                 <label className="flex items-center gap-2.5 cursor-pointer">
                     <input
                         type="checkbox"
+                        checked={formData.rememberMe}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, rememberMe: e.target.checked }))}
                         className="w-4 h-4 rounded border-slate-300 text-brand-600 bg-white transition duration-200 cursor-pointer hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-300 focus:ring-offset-2"
                     />
                     <span className="text-slate-700 font-medium">Remember me</span>
