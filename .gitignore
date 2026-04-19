@@ -39,3 +39,33 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# =========================
+# BACKEND (Express/Mongo)
+# =========================
+
+# node modules (server)
+server/node_modules/
+
+# environment variables (extra safety for backend)
+server/.env
+
+# logs
+server/logs
+*.log
+
+# nodemon temp files
+.nodemon
+
+# OS / misc
+Thumbs.db
+
+# uploads (if you add file upload later)
+server/uploads/
+
+# =========================
+# OPTIONAL (Monorepo style)
+# =========================
+
+# If you ever build backend
+server/dist/

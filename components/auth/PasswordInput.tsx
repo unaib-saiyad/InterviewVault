@@ -4,16 +4,18 @@ import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
 type PasswordInputProps = {
+  name: string;
   label: string;
   placeholder?: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: React.ChangeEvent<HTMLInputElement>) => void;
   error?: string;
   disabled?: boolean;
   autoComplete?: string;
 };
 
 export function PasswordInput({
+  name,
   label,
   placeholder,
   value,
@@ -29,10 +31,11 @@ export function PasswordInput({
       <label className="text-sm font-semibold text-slate-900">{label}</label>
       <div className="relative">
         <input
+          name={name}
           type={showPassword ? 'text' : 'password'}
           placeholder={placeholder}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(e)}
           disabled={disabled}
           autoComplete={autoComplete}
           className={`w-full rounded-lg border px-4 py-3 pr-12 text-sm transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${

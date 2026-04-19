@@ -103,11 +103,12 @@ export default function ForgotPasswordPage() {
                         {error ? <FormError message={error} /> : null}
 
                         <InputField
+                            name='email'
                             label="Email"
                             type="email"
                             placeholder="you@example.com"
                             value={email}
-                            onChange={setEmail}
+                            onChange={(e)=> setEmail(e.target.value)}
                             disabled={loading}
                             autoComplete="email"
                         />
