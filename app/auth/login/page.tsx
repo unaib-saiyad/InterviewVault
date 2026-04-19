@@ -4,7 +4,13 @@ import { AuthLayout } from '@/components/auth/AuthLayout';
 import { AuthCard } from '@/components/auth/AuthCard';
 import LoginForm from '@/components/auth/LoginForm';
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }>}) {
+    const { registered, sessionExpired } = await searchParams; 
+    const parsedParams = {
+        registered: registered === 'true',
+        sessionExpired: sessionExpired === 'true'
+    };
+
     const brandingContent = (
         <div className="max-w-sm text-center">
             <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-3xl bg-slate-900 text-white shadow-card">
@@ -34,7 +40,7 @@ export default function LoginPage() {
     return (
         <AuthLayout brandingContent={brandingContent}>
             <AuthCard title="Welcome back" description="Sign in to your interview preparation system">
-                <LoginForm />
+                <LoginForm searchParams={parsedParams} />
             </AuthCard>
         </AuthLayout>
     );

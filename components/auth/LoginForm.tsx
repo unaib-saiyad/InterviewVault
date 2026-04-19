@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 
 import { InputField } from '@/components/auth/InputField';
 import { PasswordInput } from '@/components/auth/PasswordInput';
@@ -10,9 +9,13 @@ import { SubmitButton } from '@/components/auth/SubmitButton';
 import { FormError } from '@/components/auth/FormError';
 import { FormSuccess } from './FormSuccess';
 import api from '@/lib/api';
-
-export default function LoginForm() {
-    const searchParams = useSearchParams();
+type Props = {
+    searchParams?: {
+        registered?: boolean;
+        sessionExpired?: boolean;
+    };
+};
+export default function LoginForm({searchParams}: Props) {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -22,20 +25,20 @@ export default function LoginForm() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (searchParams.get('registered')) {
+        if (searchParams?.registered) {
             setSuccess('Registration successful! Please log in.');
 
             setTimeout(() => {
                 setSuccess('');
             }, 5000);
         }
-        else if(searchParams.get('sessionExpired')){
+        else if(searchParams?.sessionExpired){
             setError('Your session has expired. Please log in again.');
             setTimeout(() => {
                 setError('');
             }, 5000);
         }
-    }, []);
+    }, [searchParams]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
