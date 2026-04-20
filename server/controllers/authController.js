@@ -2,7 +2,7 @@ import User from '../models/User.js';
 import bcrypt from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from '../utils/generateToken.js';
 import { generateToken } from '../utils/generateCryptoToken.js';
-import { sendVerificationEmail } from '../services/email.service.js';
+import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email.service.js';
 
 export const registerUser = async (req, res) => {
     try{
@@ -190,6 +190,73 @@ export const resendVerificationEmail = async (req, res) => {
         return res.status(500).json({ 
             code: 'INTERNAL_SERVER_ERROR',
             message: 'Internal Server error, please try again later or contact support.' 
+        });
+    }
+}
+
+export const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    try{
+        const user = await User.findOne({ email });
+        if(!user){
+            return res.status(400).json({
+                code: 'USER_NOT_FOUND',
+                message: 'User not found'
+             });
+        }
+        const resetToken = generateToken();
+        user.passwordResetToken = resetToken;
+        user.passwordResetTokenExpiry = Date.now() + 60 * 60 * 1000;
+        user.verificationLastSent = Date.now();
+        await user.save();
+        await sendPasswordResetEmail(user.email, resetToken);
+
+        return res.status(200).json({ 
+            code: 'SUCCESS',
+            message: 'Password reset email sent successfully'
+        });
+    }
+    catch(error){
+        return res.status(500).json({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Internal Server error, please try again later or contact support.'
+        })
+    }
+}
+
+export const resetPassword = async (req, res) => {
+    const { email, password, token } = req.body;
+    try{
+        const user = await User.findOne({ passwordResetToken: token, passwordResetTokenExpiry: { $gt: Date.now() } });
+        if(!user){
+            return res.status(400).json({
+                code: 'INVALID_OR_EXPIRED_TOKEN',
+                message: 'Invalid or expired password reset token'
+            });
+        }
+        if(!user.email === email){
+            return res.status(400).json({
+                code: 'INVALID_EMAIL',
+                message: 'Invalid email address'
+            });
+        }
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        user.password = hashedPassword;
+        user.passwordResetToken = undefined;
+        user.passwordResetTokenExpiry = undefined;
+        user.verificationLastSent = undefined;
+
+        await user.save();
+        return res.status(200).json({ 
+            code: 'SUCCESS',
+            message: 'Password reset successfully'
+         });
+    }
+    catch(error){
+        return res.status(500).json({ 
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Internal Server error, please try again later or contact support.'
         });
     }
 }

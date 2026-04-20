@@ -1,6 +1,8 @@
-import { AuthLayout } from '@/components/auth/AuthLayout';
-import { ShieldCheck } from 'lucide-react';
-import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
+import { AuthLayout } from "@/components/auth/AuthLayout";
+import { AuthCard } from "@/components/auth/AuthCard";
+import { ShieldCheck } from "lucide-react";
+import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
+
 
 const brandingContent = (
     <div className="max-w-sm text-center">
@@ -18,20 +20,23 @@ const brandingContent = (
             </div>
             <div className="flex items-start gap-3">
                 <span className="text-brand-600 font-semibold">→</span>
-                <span className="text-sm text-slate-700">Check your email inbox</span>
+                <span className="text-sm text-slate-700">Enter your new password</span>
             </div>
             <div className="flex items-start gap-3">
                 <span className="text-brand-600 font-semibold">→</span>
-                <span className="text-sm text-slate-700">Reset link expires in 24 hours</span>
+                <span className="text-sm text-slate-700">Confirm your new password</span>
             </div>
         </div>
     </div>
 );
 
-export default function ForgotPasswordPage() {
-    return (
-        <AuthLayout brandingContent={brandingContent}>
-            <ForgotPasswordForm />
-        </AuthLayout>
-    );
+export default async function ResetPasswordPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }>}) {
+  const { token, email } = await searchParams;
+  return (
+    <AuthLayout brandingContent={brandingContent}>
+      <AuthCard title="Reset your password" description="Enter your new password and confirm it to reset your password">
+        <ResetPasswordForm email={email} token={token} />
+      </AuthCard>
+    </AuthLayout>
+  )
 }

@@ -5,10 +5,11 @@ import { AuthCard } from '@/components/auth/AuthCard';
 import LoginForm from '@/components/auth/LoginForm';
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }>}) {
-    const { registered, sessionExpired } = await searchParams; 
+    const { registered, sessionExpired, loggedOut } = await searchParams; 
     const parsedParams = {
         registered: registered === 'true',
-        sessionExpired: sessionExpired === 'true'
+        sessionExpired: sessionExpired === 'true',
+        loggedOut: loggedOut === 'true'
     };
 
     const brandingContent = (

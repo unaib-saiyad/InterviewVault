@@ -16,6 +16,8 @@ import {
   X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import api from '@/lib/api';
+import { ApiError } from '@/types/apiTypes';
 
 type SidebarProps = {
   isOpen: boolean;
@@ -38,6 +40,23 @@ const accountNavigation = [
 
 export function Sidebar({ isOpen, isCompact, onClose, onToggleCompact }: SidebarProps) {
   const pathname = usePathname();
+
+  const handleLogout = () =>{
+    try{
+      api.post('/auth/logout');
+      localStorage.removeItem("accessToken");
+      window.location.href = '/auth/login?loggedOut=true';
+    }
+    catch(error){
+      if(error instanceof Error){
+        console.error('Logout failed:');
+      }
+      else{
+        const err = error as ApiError;
+        console.error('Logout failed:', err.message);
+      }
+    }
+  }
 
   return (
     <>
@@ -141,7 +160,7 @@ export function Sidebar({ isOpen, isCompact, onClose, onToggleCompact }: Sidebar
 
           {/* Footer */}
           <div className="border-t border-slate-200 space-y-2 px-2 py-4">
-            <button className={cn(
+            <button onClick={handleLogout} className={cn(
               'group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-red-50 hover:text-red-700',
               isCompact && 'justify-center'
             )} title={isCompact ? 'Logout' : undefined}>
@@ -246,7 +265,7 @@ export function Sidebar({ isOpen, isCompact, onClose, onToggleCompact }: Sidebar
 
           {/* Footer */}
           <div className="border-t border-slate-200 px-2 py-4">
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-red-50 hover:text-red-700">
+            <button onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-red-50 hover:text-red-700">
               <LogOut className="h-5 w-5 text-slate-400 group-hover:text-red-600" />
               <span className="truncate">Logout</span>
             </button>
