@@ -1,7 +1,6 @@
 'use client';
 
 import { User, Mail, Settings } from 'lucide-react';
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { SectionCard } from '@/components/dashboard/SectionCard';
 import { useEffect, useState } from 'react';
 
@@ -11,7 +10,6 @@ export default function ProfilePage() {
         setLoading(false);
     })
   return (
-    <DashboardLayout title="Profile">
       <div className="space-y-8">
         {/* Header */}
         <div>
@@ -114,6 +112,5 @@ export default function ProfilePage() {
           )}
         </SectionCard>
       </div>
-    </DashboardLayout>
   );
 }

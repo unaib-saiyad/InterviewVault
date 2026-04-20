@@ -1,5 +1,4 @@
 'use client';
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { SectionCard } from '@/components/dashboard/SectionCard';
 import { TaskList } from '@/components/dashboard/TaskList';
@@ -94,7 +93,6 @@ export default function DashboardPage() {
     setHasMounted(true);
   }, []);
   return (
-    <DashboardLayout title="Dashboard">
       <div className="space-y-8">
         {/* Header Section */}
         <div className="flex flex-col gap-6 lg:gap-8">
@@ -282,6 +280,5 @@ export default function DashboardPage() {
         </div>
 
       </div>
-    </DashboardLayout>
   );
 }

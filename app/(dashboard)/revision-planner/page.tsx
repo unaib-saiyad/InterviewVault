@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Plus, Calendar, Clock } from 'lucide-react';
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { SectionCard } from '@/components/dashboard/SectionCard';
 
 const mockRevisions = [
@@ -53,7 +52,6 @@ export default function RevisionPlannerPage() {
   }, []);
 
   return (
-    <DashboardLayout title="Revision Planner">
       <div className="space-y-8">
         {/* Header with action */}
         <div className="flex items-center justify-between">
@@ -136,6 +134,5 @@ export default function RevisionPlannerPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
   );
 }

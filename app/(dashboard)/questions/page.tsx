@@ -1,7 +1,6 @@
 'use client';
 
 import { Plus, Search } from 'lucide-react';
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { SectionCard } from '@/components/dashboard/SectionCard';
 import { useEffect, useState } from 'react';
 
@@ -50,7 +49,6 @@ export default function QuestionsPage() {
   }, [])
 
   return (
-    <DashboardLayout title="Questions">
       <div className="space-y-8">
         {/* Header with action */}
         <div className="flex items-center justify-between">
@@ -113,6 +111,5 @@ export default function QuestionsPage() {
           )}
         </SectionCard>
       </div>
-    </DashboardLayout>
   );
 }

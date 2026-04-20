@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { TrendingUp, Target, Award } from 'lucide-react';
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { ChartCard } from '@/components/dashboard/ChartCard';
 import { SectionCard } from '@/components/dashboard/SectionCard';
@@ -50,7 +49,6 @@ export default function ProgressPage() {
   }, []);
 
   return (
-    <DashboardLayout title="Progress">
       <div className="space-y-8">
         {/* Header */}
         <div>
@@ -193,6 +191,5 @@ export default function ProgressPage() {
           )}
         </SectionCard>
       </div>
-    </DashboardLayout>
   );
 }

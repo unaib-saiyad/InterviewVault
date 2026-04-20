@@ -1,5 +1,4 @@
 import { Plus } from 'lucide-react';
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
 import { SectionCard } from '@/components/dashboard/SectionCard';
 import { InterviewListSkeleton } from '@/components/dashboard/skeletons';
 import { InterviewList } from '@/components/dashboard/InterviewList';
@@ -46,7 +45,6 @@ const mockInterviews = [
 export default function Interviews() {
     const loading = false;
   return (
-    <DashboardLayout title='Interviews' >
         <div className="space-y-8">
         {/* Header with action */}
         <div className="flex items-center justify-between">
@@ -71,6 +69,5 @@ export default function Interviews() {
           )}
         </SectionCard>
       </div>
-    </DashboardLayout>
   )
 }
