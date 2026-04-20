@@ -10,14 +10,17 @@ import { FormError } from '@/components/auth/FormError';
 import { FormSuccess } from './FormSuccess';
 import api from '@/lib/api';
 import { ApiError } from '@/types/apiTypes';
+import { useRouter} from 'next/navigation';
 
 type Props = {
     searchParams?: {
         registered?: boolean;
         sessionExpired?: boolean;
+        loggedOut?: boolean;
     };
 };
 export default function LoginForm({searchParams}: Props) {
+    const router = useRouter();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -33,6 +36,9 @@ export default function LoginForm({searchParams}: Props) {
         }
         else if(searchParams?.sessionExpired){
             setError('Your session has expired. Please log in again.');
+        }
+        else if(searchParams?.loggedOut){
+            setSuccess('You have been logged out successfully.');
         }
     }, [searchParams]);
 
@@ -68,7 +74,7 @@ export default function LoginForm({searchParams}: Props) {
             localStorage.setItem('accessToken', res.data.accessToken);
             setSuccess('Login successful! Redirecting...');
             setTimeout(() => {
-                window.location.href = '/dashboard';
+                router.push("/dashboard");
             }, 2000);
         }
         catch(error){
