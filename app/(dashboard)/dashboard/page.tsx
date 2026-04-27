@@ -4,6 +4,7 @@ import { SectionCard } from '@/components/dashboard/SectionCard';
 import { TaskList } from '@/components/dashboard/TaskList';
 import { ChartCard } from '@/components/dashboard/ChartCard';
 import { InterviewList } from '@/components/dashboard/InterviewList';
+import { AddInterviewModal } from '@/components/dashboard/AddInterviewModal';
 
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -87,32 +88,41 @@ const chartData = [
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [hasMounted, setHasMounted] = useState(false);
+  const [isAddInterviewModalOpen, setIsAddInterviewModalOpen] = useState(false);
 
   useEffect(() => {
-    setLoading(false);
-    setHasMounted(true);
+    const timer = setTimeout(() => {
+      setLoading(false);
+      setHasMounted(true);
+    }, 800); 
+
+    return () => clearTimeout(timer);
   }, []);
+
+  const handleAddInterview = (data: any) => {
+    console.log('Adding interview:', data);
+  };
   return (
-      <div className="space-y-8">
+      <div className="space-y-10">
         {/* Header Section */}
-        <div className="flex flex-col gap-6 lg:gap-8">
-          <div className="max-w-2xl">
-            <h1 className="text-3xl lg:text-4xl font-black text-slate-900 leading-tight mb-2">Welcome back!</h1>
-            <p className="text-base text-slate-600">Here's your current progress on interview preparation.</p>
-          </div>
+        <div className="flex flex-col gap-8 lg:gap-10">
+
 
           {/* Quick Actions */}
-          <div className="flex flex-wrap gap-3">
-            <button className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-brand-700 hover:shadow-lg active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
+          <div className="flex flex-wrap gap-4">
+            <button
+              onClick={() => setIsAddInterviewModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-brand-700 hover:shadow-lg hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+            >
               <Plus className="h-4 w-4" />
               <span>Add Interview</span>
             </button>
-            <button className="inline-flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:border-slate-400 hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2">
+            <button className="inline-flex items-center gap-2 rounded-2xl border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:border-gray-400 hover:shadow-md hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Add Question</span>
               <span className="sm:hidden">Question</span>
             </button>
-            <button className="inline-flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:border-slate-400 hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2">
+            <button className="inline-flex items-center gap-2 rounded-2xl border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:border-gray-400 hover:shadow-md hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2">
               <Calendar className="h-4 w-4" />
               <span className="hidden sm:inline">Plan Revision</span>
               <span className="sm:hidden">Revision</span>
@@ -121,7 +131,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
           ) : (
@@ -137,7 +147,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid gap-7 lg:grid-cols-[minmax(0,2fr)_1fr]">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_1fr]">
           {/* Left Column */}
           <div className="space-y-8 lg:col-span-2">
             {/* Focus Today */}
@@ -163,8 +173,8 @@ export default function DashboardPage() {
               ) : (
                 <div className="space-y-3">
                   {weakTopics.map((topic, index) => (
-                    <div key={index} className="flex items-center justify-between p-3.5 rounded-lg border border-slate-200 bg-slate-50/60 hover:bg-slate-100 transition-colors duration-200">
-                      <span className="text-sm font-medium text-slate-900">{topic.name}</span>
+                    <div key={index} className="flex items-center justify-between p-3.5 rounded-lg border border-gray-200 bg-gray-50/60 hover:bg-gray-100 transition-colors duration-200">
+                      <span className="text-sm font-medium text-gray-900">{topic.name}</span>
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-colors duration-200 ${topic.level === 'Weak'
                           ? 'bg-red-100 text-red-700'
                           : 'bg-amber-100 text-amber-700'
@@ -223,9 +233,9 @@ export default function DashboardPage() {
               ) : (
                 <div className="flex h-full items-center justify-center">
                   <div className="text-center">
-                    <BarChart3 className="mx-auto h-12 w-12 text-slate-300" />
-                    <p className="mt-3 text-sm font-medium text-slate-600">No data available yet</p>
-                    <p className="text-xs text-slate-500 mt-1">Start adding questions to see progress</p>
+                    <BarChart3 className="mx-auto h-12 w-12 text-gray-300" />
+                    <p className="mt-3 text-sm font-medium text-gray-600">No data available yet</p>
+                    <p className="text-xs text-gray-500 mt-1">Start adding questions to see progress</p>
                   </div>
                 </div>
               )}
@@ -239,7 +249,7 @@ export default function DashboardPage() {
               {loading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="flex items-center justify-between p-3.5 rounded-lg border border-slate-200 bg-slate-50">
+                    <div key={i} className="flex items-center justify-between p-3.5 rounded-lg border border-gray-200 bg-gray-50">
                       <div className="flex-1">
                         <div className="skeleton h-4 w-full mb-1.5" />
                         <div className="skeleton h-3 w-16" />
@@ -251,10 +261,10 @@ export default function DashboardPage() {
               ) : (
                 <div className="space-y-3">
                   {revisionTasks.map((task) => (
-                    <div key={task.id} className="flex items-start gap-3 p-3.5 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-100 transition-colors duration-200">
+                    <div key={task.id} className="flex items-start gap-3 p-3.5 rounded-lg border border-gray-200 bg-gray-50/50 hover:bg-gray-100 transition-colors duration-200">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-900">{task.title}</p>
-                        <p className="text-xs text-slate-500 mt-1">Due: {task.dueDate}</p>
+                        <p className="text-sm font-medium text-gray-900">{task.title}</p>
+                        <p className="text-xs text-gray-500 mt-1">Due: {task.dueDate}</p>
                       </div>
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-colors duration-200 ${task.status === 'completed'
                           ? 'bg-green-100 text-green-700'
@@ -278,6 +288,13 @@ export default function DashboardPage() {
             </SectionCard>
           </div>
         </div>
+
+        {/* Add Interview Modal */}
+        <AddInterviewModal
+          isOpen={isAddInterviewModalOpen}
+          onClose={() => setIsAddInterviewModalOpen(false)}
+          onSubmit={handleAddInterview}
+        />
 
       </div>
   );

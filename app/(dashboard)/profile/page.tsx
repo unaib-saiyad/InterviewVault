@@ -11,14 +11,6 @@ export default function ProfilePage() {
     })
   return (
       <div className="space-y-8">
-        {/* Header */}
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Profile Settings</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Manage your account settings and preferences
-          </p>
-        </div>
-
         {/* Profile Overview */}
         <SectionCard title="Profile Information">
           {loading ? (
