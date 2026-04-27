@@ -44,9 +44,13 @@ const difficultyColors = {
 export default function QuestionsPage() {
   const [loading, setLoading] = useState(true);
 
-  useEffect(()=>{
-    setLoading(false);
-  }, [])
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
       <div className="space-y-8">

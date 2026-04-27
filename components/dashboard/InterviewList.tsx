@@ -24,14 +24,14 @@ export function InterviewList({ interviews, className }: InterviewListProps) {
   return (
     <div className={cn('space-y-3', className)}>
       {interviews.map((interview) => (
-        <div key={interview.id} className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-xs transition-all duration-200 hover:bg-slate-50">
+        <div key={interview.id} className="flex items-start justify-between gap-4 rounded-2xl border border-gray-200 bg-white px-4 py-4 shadow-xs transition-all duration-200 hover:bg-gray-50">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1.5">
-              <MapPin className="h-4 w-4 text-slate-400 flex-shrink-0" />
-              <span className="font-semibold text-slate-900 truncate">{interview.company}</span>
+              <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              <span className="font-semibold text-gray-900 truncate">{interview.company}</span>
             </div>
-            <p className="text-sm text-slate-600 mb-1.5 truncate">{interview.role}</p>
-            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <p className="text-sm text-gray-600 mb-1.5 truncate">{interview.role}</p>
+            <div className="flex items-center gap-1.5 text-xs text-gray-500">
               <Calendar className="h-3 w-3 flex-shrink-0" />
               <span className="truncate">{interview.date}</span>
             </div>

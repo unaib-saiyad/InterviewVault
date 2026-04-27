@@ -16,11 +16,11 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
   const [sidebarCompact, setSidebarCompact] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-900/50 md:hidden"
+          className="fixed inset-0 z-40 bg-slate-900/50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -36,13 +36,13 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
       {/* Main content */}
       <div className={cn(
         'flex flex-col transition-all duration-300 ease-out',
-        sidebarCompact ? 'md:ml-20' : 'md:ml-64'
+        sidebarCompact ? 'lg:ml-20' : 'lg:ml-64'
       )}>
         <Topbar
           title={title}
           onMenuClick={() => setSidebarOpen(true)}
         />
-        <main className="flex-1 bg-slate-50">
+        <main className="flex-1 bg-slate-50/80">
           <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             {children}
           </div>
