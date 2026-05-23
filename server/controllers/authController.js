@@ -260,3 +260,18 @@ export const resetPassword = async (req, res) => {
         });
     }
 }
+
+export const verifyUser = async(req, res)=>{
+    const userId = req.user;
+    const isUserExists = User.findById(userId);
+    if(isUserExists){
+        return res.status(201).json({
+            code: "USER_AUTHENTICATED",
+            message: "User authenticated"
+        });
+    }
+    return res.status(400).json({
+        code: "USER_UNAUTHENTICATED",
+        message: "User unauthenticated"
+    });
+}

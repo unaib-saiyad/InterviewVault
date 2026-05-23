@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, loginUser, logoutUser, refreshToken, verifyEmail, resendVerificationEmail, forgotPassword, resetPassword } from '../controllers/authController.js';
+import { registerUser, loginUser, logoutUser, refreshToken, verifyEmail, resendVerificationEmail, forgotPassword, resetPassword, verifyUser } from '../controllers/authController.js';
 import { emailValidationRules, loginValidationRules, signupValidationRules, passwordResetValidationRules } from '../validators/userValidator.js';
 import validate from '../middleware/validate.js';
 import { protect } from '../middleware/protect.js';
@@ -16,5 +16,6 @@ router.post('/reset-password', passwordResetValidationRules, validate, resetPass
 
 // refresh token route to issue new access token using refresh token
 router.get('/refresh-token', refreshToken);
+router.get('/varify-user', protect, validate, verifyUser);
 
 export default router;

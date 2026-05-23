@@ -13,6 +13,7 @@ type AddInterviewModalProps = {
 type InterviewData = {
   title: string;
   company: string;
+  round: number;
   role: string;
   date: string;
 };
@@ -21,6 +22,7 @@ export function AddInterviewModal({ isOpen, onClose, onSubmit }: AddInterviewMod
   const [formData, setFormData] = useState<InterviewData>({
     title: '',
     company: '',
+    round: 1,
     role: '',
     date: '',
   });
@@ -28,12 +30,12 @@ export function AddInterviewModal({ isOpen, onClose, onSubmit }: AddInterviewMod
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
-    setFormData({ title: '', company: '', role: '', date: '' });
+    setFormData({ title: '', company: '', round: 1, role: '', date: '' });
     onClose();
   };
 
   const handleClose = () => {
-    setFormData({ title: '', company: '', role: '', date: '' });
+    setFormData({ title: '', company: '', round: 1, role: '', date: '' });
     onClose();
   };
 
@@ -48,6 +50,7 @@ export function AddInterviewModal({ isOpen, onClose, onSubmit }: AddInterviewMod
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm"
+            style={{ "marginBlockEnd": "0px"}}
             onClick={handleClose}
           />
 
@@ -81,6 +84,7 @@ export function AddInterviewModal({ isOpen, onClose, onSubmit }: AddInterviewMod
                   <input
                     type="text"
                     id="title"
+                    name='title'
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-colors duration-200"
@@ -91,17 +95,37 @@ export function AddInterviewModal({ isOpen, onClose, onSubmit }: AddInterviewMod
 
                 <div>
                   <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
-                    Company
+                    Company Name
                   </label>
                   <div className="relative">
                     <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <input
                       type="text"
                       id="company"
+                      name='company'
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                       className="w-full rounded-xl border border-gray-300 pl-10 pr-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-colors duration-200"
                       placeholder="e.g., Google"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="round" className="block text-sm font-medium text-gray-700 mb-2">
+                    Interview Round No.
+                  </label>
+                  <div className="relative">
+                    <Briefcase className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="number"
+                      id="round"
+                      name='round'
+                      value={formData.round}
+                      onChange={(e) => setFormData({ ...formData, round: Number(e.target.value) })}
+                      className="w-full rounded-xl border border-gray-300 pl-10 pr-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-colors duration-200"
+                      placeholder="e.g., Senior Frontend Engineer"
                       required
                     />
                   </div>
@@ -116,6 +140,7 @@ export function AddInterviewModal({ isOpen, onClose, onSubmit }: AddInterviewMod
                     <input
                       type="text"
                       id="role"
+                      name='role'
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                       className="w-full rounded-xl border border-gray-300 pl-10 pr-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-colors duration-200"
@@ -134,6 +159,7 @@ export function AddInterviewModal({ isOpen, onClose, onSubmit }: AddInterviewMod
                     <input
                       type="date"
                       id="date"
+                      name='date'
                       value={formData.date}
                       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                       className="w-full rounded-xl border border-gray-300 pl-10 pr-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-colors duration-200"
