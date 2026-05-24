@@ -1,16 +1,22 @@
 import mongoose from "mongoose";
+import slugify from "slugify";
 
 const roleSchema = new mongoose.Schema(
     {
         title: {
             type: String,
             required: true,
-            unique: true,
             trim: true
+        },
+        normalizedTitle: {
+            type: String,
+            required: true,
+            unique: true
         },
 
         slug: {
             type: String,
+            required: true,
             unique: true
         },
 
@@ -28,12 +34,39 @@ const roleSchema = new mongoose.Schema(
             ]
         },
 
-        aliases: [String],
+        aliases: [
+            {
+                type: String,
+                trim: true
+            }
+        ],
 
-        skills: [String]
+        skills: [
+            {
+                type: String,
+                trim: true
+            }
+        ]
     },
     { timestamps: true }
 );
+
+roleSchema.pre("validate", async function () {
+
+    if (this.title) {
+        this.normalizedTitle = this.title
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, " ");
+
+        this.slug = slugify(this.title, {
+            lower: true,
+            strict: true,
+            trim: true
+        });
+    }
+
+});
 
 const Role = mongoose.model("Role", roleSchema);
 

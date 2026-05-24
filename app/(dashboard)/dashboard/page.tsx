@@ -293,7 +293,6 @@ export default function DashboardPage() {
         <AddInterviewModal
           isOpen={isAddInterviewModalOpen}
           onClose={() => setIsAddInterviewModalOpen(false)}
-          onSubmit={handleAddInterview}
         />
 
       </div>

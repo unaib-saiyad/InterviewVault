@@ -263,7 +263,7 @@ export const resetPassword = async (req, res) => {
 
 export const verifyUser = async(req, res)=>{
     const userId = req.user;
-    const isUserExists = User.findById(userId);
+    const isUserExists = await User.findById(userId);
     if(isUserExists){
         return res.status(201).json({
             code: "USER_AUTHENTICATED",

@@ -2,40 +2,51 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, Building2, Briefcase } from 'lucide-react';
+import { X, Calendar, Briefcase } from 'lucide-react';
+import { ExperienceLevel, InterviewStatus, InterviewData, OverallRating } from '@/types/interviewTypes';
+import CompanySelector from '../interview/CompanySelector';
+import RoleSelector from '../interview/RoleSelector';
+import SourceSelector from '../interview/SourceSelector';
+import api from '@/lib/api';
 
 type AddInterviewModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: InterviewData) => void;
 };
 
-type InterviewData = {
-  title: string;
-  company: string;
-  round: number;
-  role: string;
-  date: string;
-};
 
-export function AddInterviewModal({ isOpen, onClose, onSubmit }: AddInterviewModalProps) {
+
+export function AddInterviewModal({ isOpen, onClose }: AddInterviewModalProps) {
   const [formData, setFormData] = useState<InterviewData>({
-    title: '',
-    company: '',
-    round: 1,
-    role: '',
-    date: '',
+    company: null,
+    role: null,
+    experienceLevel: ExperienceLevel.Fresher,
+    status: InterviewStatus.Applied,
+    overallFeedback: '',
+    overallRating: 0,
+    source: null
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
-    setFormData({ title: '', company: '', round: 1, role: '', date: '' });
-    onClose();
+    // onSubmit(formData);
+    if(!formData.company || !formData.role || !formData.source) {
+      alert("Company, Role, and Source are required fields.");
+      return;
+    }
+    try{
+      await api.post("/interviews", formData)
+      alert("Interview added successfully!");
+      setFormData({ company: null, role: null, experienceLevel: ExperienceLevel.Fresher, status: InterviewStatus.Applied, overallFeedback: '', overallRating: 0, source: null });
+      onClose();
+    } catch(error) {
+      console.error("Error adding interview:", error);
+      alert("Failed to add interview. Please try again.");
+    }
   };
 
   const handleClose = () => {
-    setFormData({ title: '', company: '', round: 1, role: '', date: '' });
+    setFormData({ company: null, role: null, experienceLevel: ExperienceLevel.Fresher, status: InterviewStatus.Applied, overallFeedback: '', overallRating: 0, source: null });
     onClose();
   };
 
@@ -50,7 +61,7 @@ export function AddInterviewModal({ isOpen, onClose, onSubmit }: AddInterviewMod
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm"
-            style={{ "marginBlockEnd": "0px"}}
+            style={{ "marginBlockEnd": "0px" }}
             onClick={handleClose}
           />
 
@@ -61,7 +72,7 @@ export function AddInterviewModal({ isOpen, onClose, onSubmit }: AddInterviewMod
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg"
+              className="w-full rounded-2xl bg-white p-6 shadow-lg"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
@@ -77,98 +88,156 @@ export function AddInterviewModal({ isOpen, onClose, onSubmit }: AddInterviewMod
 
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                  <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                    Interview Title
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    name='title'
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-colors duration-200"
-                    placeholder="e.g., Frontend Developer Interview"
-                    required
-                  />
-                </div>
+                <div className='grid md:grid-cols-2 sm:grid-cols-1 gap-2'>
 
-                <div>
-                  <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
-                    Company Name
-                  </label>
-                  <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      id="company"
-                      name='company'
+                  <div>
+                    <CompanySelector
                       value={formData.company}
-                      onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                      className="w-full rounded-xl border border-gray-300 pl-10 pr-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-colors duration-200"
-                      placeholder="e.g., Google"
-                      required
+                      onChange={(company) => setFormData({ ...formData, company })}
                     />
                   </div>
-                </div>
 
-                <div>
-                  <label htmlFor="round" className="block text-sm font-medium text-gray-700 mb-2">
-                    Interview Round No.
-                  </label>
-                  <div className="relative">
-                    <Briefcase className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="number"
-                      id="round"
-                      name='round'
-                      value={formData.round}
-                      onChange={(e) => setFormData({ ...formData, round: Number(e.target.value) })}
-                      className="w-full rounded-xl border border-gray-300 pl-10 pr-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-colors duration-200"
-                      placeholder="e.g., Senior Frontend Engineer"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-                    Role
-                  </label>
-                  <div className="relative">
-                    <Briefcase className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      id="role"
-                      name='role'
+                  <div>
+                    <RoleSelector
                       value={formData.role}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                      className="w-full rounded-xl border border-gray-300 pl-10 pr-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-colors duration-200"
-                      placeholder="e.g., Senior Frontend Engineer"
-                      required
+                      onChange={(role) => setFormData({ ...formData, role })}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="experienceLevel"
+                      className="mb-2 block text-sm font-medium text-gray-700"
+                    >
+                      Experience Level
+                    </label>
+
+                    <select
+                      id="experienceLevel"
+                      value={formData.experienceLevel}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          experienceLevel: e.target.value as ExperienceLevel,
+                        }))
+                      }
+                      className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                    >
+                      <option value={ExperienceLevel.Internship}>
+                        Internship
+                      </option>
+
+                      <option value={ExperienceLevel.Fresher}>
+                        Fresher
+                      </option>
+
+                      <option value={ExperienceLevel.Junior}>
+                        Junior
+                      </option>
+
+                      <option value={ExperienceLevel.Mid}>
+                        Mid Level
+                      </option>
+
+                      <option value={ExperienceLevel.Senior}>
+                        Senior
+                      </option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="status"
+                      className="mb-2 block text-sm font-medium text-gray-700"
+                    >
+                      Status
+                    </label>
+
+                    <select
+                      id="status"
+                      value={formData.status}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          status: e.target.value as InterviewStatus,
+                        }))
+                      }
+                      className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                    >
+                      <option value={InterviewStatus.Applied}>
+                        Applied
+                      </option>
+                      <option value={InterviewStatus.Shortlisted}>
+                        Shortlisted
+                      </option>
+                      <option value={InterviewStatus.InterviewScheduled}>
+                        Interview Scheduled
+                      </option>
+                      <option value={InterviewStatus.Rejected}>
+                        Rejected
+                      </option>
+                      <option value={InterviewStatus.Selected}>
+                        Selected
+                      </option>
+                      <option value={InterviewStatus.OfferReceived}>
+                        Offer Received
+                      </option>
+
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="overallFeedback" className="block text-sm font-medium text-gray-700 mb-2">
+                      Overall Feedback
+                    </label>
+                    <div className="relative">
+                      <Briefcase className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        id="overallFeedback"
+                        name='overallFeedback'
+                        value={formData.overallFeedback}
+                        onChange={(e) => setFormData({ ...formData, overallFeedback: e.target.value })}
+                        className="w-full rounded-xl border border-gray-300 pl-10 pr-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-colors duration-200"
+                        placeholder="e.g., Great communication, but technical round was tough"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="overallRating" className="block text-sm font-medium text-gray-700 mb-2">
+                      Overall Rating (0-10)
+                    </label>
+                    <div className="relative">
+                      <Briefcase className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="number"
+                        id="overallRating"
+                        name='overallRating'
+                        min={0}
+                        max={10}
+                        value={formData.overallRating}
+                        onChange={(e) => {
+                          let rating = parseInt(e.target.value);
+                          if (isNaN(rating)) rating = 0;
+                          else if (rating < 0) rating = 0;
+                          else if (rating > 10) rating = 10;
+                          setFormData({ ...formData, overallRating: rating as OverallRating });
+                        }}
+                        className="w-full rounded-xl border border-gray-300 pl-10 pr-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-colors duration-200"
+                        placeholder="e.g., 7"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <SourceSelector
+                      value={formData.source}
+                      onChange={(source) => setFormData({ ...formData, source })}
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-                    Interview Date
-                  </label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="date"
-                      id="date"
-                      name='date'
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className="w-full rounded-xl border border-gray-300 pl-10 pr-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-colors duration-200"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Buttons */}
                 <div className="flex gap-3 pt-2">
                   <button
                     type="button"
