@@ -21,7 +21,7 @@ const interviewSchema = new mongoose.Schema(
 
         experienceLevel: {
             type: String,
-            enum: ["fresher", "junior", "mid", "senior"]
+            enum: ["internship", "fresher", "junior", "mid", "senior"]
         },
 
         status: {
@@ -41,7 +41,7 @@ const interviewSchema = new mongoose.Schema(
 
         overallRating: {
             type: Number,
-            min: 1,
+            min: 0,
             max: 10
         },
 
@@ -53,8 +53,8 @@ const interviewSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-const Interview = mongoose.model("Interview", interviewSchema);
+interviewSchema.index({  user: 1, company: 1, source: 1 });
 
-Interview.index({  user: 1, company: 1, role: 1, source: 1 });
+const Interview = mongoose.model("Interview", interviewSchema);
 
 export default Interview;

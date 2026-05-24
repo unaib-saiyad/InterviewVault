@@ -93,7 +93,7 @@ export function Sidebar({ isOpen, isCompact, onClose, onToggleCompact }: Sidebar
           'hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col bg-gray-50 border-r border-gray-200 shadow-lg backdrop-blur-xl'
         )}
       >
-        <div className="flex h-full flex-col bg-gray-50">
+        <div className="flex h-full flex-col bg-white">
           {/* Header with logo and toggle */}
           <motion.div
             initial={{ opacity: 0, y: -24 }}
@@ -118,9 +118,9 @@ export function Sidebar({ isOpen, isCompact, onClose, onToggleCompact }: Sidebar
                     animate={{ opacity: 1, width: 'auto' }}
                     exit={{ opacity: 0, width: 0 }}
                     transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="text-lg font-bold text-gray-900 truncate"
+                    className="text-lg font-bold text-gray-700 truncate"
                   >
-                    Interview Vault
+                    I Vault
                   </motion.span>
                 )}
               </AnimatePresence>
