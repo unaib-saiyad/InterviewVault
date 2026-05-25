@@ -80,3 +80,32 @@ export const createInterview = async (req, res) => {
         });
     }
 };
+
+export const getInterviews = async (req, res) => {
+    try {
+        const userId = req.user;
+        const user = await User.findById(userId);
+        if(!user){
+            return res.status(401).json({
+                code: "USER_NOT_AUTHENTICATED",
+                message: "User not authenticated"
+            });
+        }
+        const interviews = await Interview.find({ user: userId })
+            .populate("company", "name logo")
+            .populate("role", "title slug")
+            .populate("source", "name")
+            .sort({ createdAt: -1 });
+        return res.status(200).json({
+            code: "INTERVIEWS_FETCHED",
+            message: "Interviews fetched successfully",
+            data: interviews
+        });
+    } catch (error) {
+        console.error("Get Interviews Error:", error);
+        return res.status(500).json({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to fetch interviews"
+        });
+    }
+};

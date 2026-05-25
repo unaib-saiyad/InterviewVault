@@ -3,7 +3,7 @@ import { StatCard } from '@/components/dashboard/StatCard';
 import { SectionCard } from '@/components/dashboard/SectionCard';
 import { TaskList } from '@/components/dashboard/TaskList';
 import { ChartCard } from '@/components/dashboard/ChartCard';
-import { InterviewList } from '@/components/dashboard/InterviewList';
+import { InterviewList } from '@/components/interview/InterviewList';
 import { AddInterviewModal } from '@/components/dashboard/AddInterviewModal';
 
 import { useState, useEffect } from 'react';
@@ -280,11 +280,7 @@ export default function DashboardPage() {
 
             {/* Recent Interviews */}
             <SectionCard title="Recent Interviews">
-              {loading ? (
-                <InterviewListSkeleton />
-              ) : (
-                <InterviewList interviews={recentInterviews} />
-              )}
+              <InterviewList />
             </SectionCard>
           </div>
         </div>
