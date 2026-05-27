@@ -7,9 +7,9 @@ import { cn } from '@/lib/utils';
 import { StatusBadge } from './StatusBadge';
 import { DifficultyBadge } from './DifficultyBadge';
 import type { Interview } from './mockData';
-
+import type { InterviewDetails } from '@/types/interviewTypes';
 type InterviewHeaderProps = {
-  interview: Interview;
+  interview: InterviewDetails;
 };
 
 export function InterviewHeader({ interview }: InterviewHeaderProps) {
@@ -49,11 +49,11 @@ export function InterviewHeader({ interview }: InterviewHeaderProps) {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-1">
                   <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">
-                    {interview.companyName}
+                    {interview.company.name}
                   </h1>
                   <span className="hidden sm:inline text-gray-300">/</span>
                   <span className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-600 truncate w-full sm:w-auto">
-                    {interview.roleName}
+                    {interview.role?.title || 'Unknown Role'}
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 mt-2">
@@ -67,11 +67,11 @@ export function InterviewHeader({ interview }: InterviewHeaderProps) {
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-sm text-gray-500">
               <div className="flex items-center gap-1.5">
                 <Globe className="h-4 w-4 text-gray-400" />
-                <span>{interview.source}</span>
+                <span>{interview.source?.name || 'Unknown Source'}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4 text-gray-400" />
-                <span>{new Date(interview.createdDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                <span>{new Date(interview.dateOfApplication).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
               </div>
             </div>
           </div>

@@ -44,8 +44,8 @@ const interviewRoundSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-const InterviewRound = mongoose.model("InterviewRound", interviewRoundSchema);
+interviewRoundSchema.index({ interview: 1, roundNumber: 1 });
 
-InterviewRound.index({ interview: 1, roundNumber: 1 });
+const InterviewRound = mongoose.model("InterviewRound", interviewRoundSchema);
 
 export default InterviewRound;

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { BarChart3, Brain, CheckCircle2, Layers, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Round } from './mockData';
+import type { QuestionStats } from '@/types/interviewTypes';
 
 type InterviewStatsProps = {
   rounds: Round[];
@@ -42,77 +43,36 @@ function StatCard({ icon: Icon, label, value, subtext, color, delay }: StatCardP
   );
 }
 
-export function InterviewStats({ rounds }: InterviewStatsProps) {
-  const totalRounds = rounds.length;
-  const totalQuestions = rounds.reduce((acc, r) => acc + r.questions.length, 0);
-  const solvedQuestions = rounds.reduce(
-    (acc, r) => acc + r.questions.filter((q) => q.solved).length,
-    0
-  );
-
-  // Count follow-up questions as well for a more complete picture
-  const allFollowUps = rounds.flatMap((r) =>
-    r.questions.flatMap((q) => q.followUps || [])
-  );
-  const totalWithFollowUps = totalQuestions + allFollowUps.length;
-  const solvedWithFollowUps =
-    solvedQuestions + allFollowUps.filter((fq) => fq.solved).length +
-    allFollowUps.flatMap((fq) => fq.children || []).filter((c) => c.solved).length;
-
-  // Difficulty breakdown
-  const difficultyCounts = { easy: 0, medium: 0, hard: 0 };
-  rounds.forEach((r) => {
-    if (r.difficulty === 'easy') difficultyCounts.easy++;
-    else if (r.difficulty === 'medium') difficultyCounts.medium++;
-    else if (r.difficulty === 'hard') difficultyCounts.hard++;
-  });
-  // Include question difficulties too
-  rounds.forEach((r) =>
-    r.questions.forEach((q) => {
-      if (q.difficulty === 'easy') difficultyCounts.easy++;
-      else if (q.difficulty === 'medium') difficultyCounts.medium++;
-      else if (q.difficulty === 'hard') difficultyCounts.hard++;
-    })
-  );
-
-  const overallDifficulty =
-    difficultyCounts.hard > difficultyCounts.easy + difficultyCounts.medium
-      ? 'Hard'
-      : difficultyCounts.medium >= difficultyCounts.easy
-        ? 'Medium'
-        : 'Easy';
-
-  const statColor = (bg: string) => bg;
-
+export function InterviewStats({ statistics }: { statistics: QuestionStats }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       <StatCard
         icon={Layers}
         label="Total Rounds"
-        value={totalRounds}
+        value={statistics.totalRounds}
         color="bg-brand-500"
         delay={0.1}
       />
       <StatCard
         icon={Brain}
         label="Total Questions"
-        value={totalWithFollowUps}
-        subtext="incl. follow-ups"
+        value={statistics.totalQuestions}
+        subtext={`incl. ${statistics.totalQuestions - statistics.rootQuestions} follow-ups`}
         color="bg-violet-500"
         delay={0.15}
       />
       <StatCard
         icon={CheckCircle2}
         label="Solved"
-        value={solvedWithFollowUps}
-        subtext={`of ${totalWithFollowUps}`}
+        value={statistics.solvedQuestions}
+        subtext={`of ${statistics.totalQuestions}`}
         color="bg-emerald-500"
         delay={0.2}
       />
       <StatCard
         icon={Target}
         label="Difficulty"
-        value={overallDifficulty}
+        value={statistics.difficulty.charAt(0).toUpperCase() + statistics.difficulty.slice(1)}
         color="bg-amber-500"
         delay={0.25}
       />
@@ -139,7 +99,7 @@ export function RoundTimeline({ rounds }: { rounds: Round[] }) {
 
           return (
             <div key={round.id} className="flex-1 flex flex-col items-center">
-              <div className="flex items-center w-full">
+              <div className="flex items-center w-full" title={round.result.charAt(0).toUpperCase() + round.result.slice(1)}>
                 {/* Connecting line before */}
                 {index > 0 && (
                   <div

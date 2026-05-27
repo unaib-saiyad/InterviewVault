@@ -67,4 +67,40 @@ export type InterviewData = {
     overallFeedback: string;
     overallRating: OverallRating;
     source: SourceOption | null;
+    dateOfApplication?: Date | null;
   };
+
+  export type CompanyDetails = {
+    _id: string;
+    name: string;
+    logo?: string;
+    website?: string;
+    location?: string;
+    industry?: string;
+  };
+
+  
+  export type InterviewDetails = {
+    id: string;
+    company: CompanyDetails;
+    dateOfApplication: string;
+    experienceLevel: string;
+    status: string;
+    overallFeedback: string;
+    overallRating: number;
+    role: {
+      _id: string;
+      title: string;
+    } | null;
+    source: {
+      _id: string;
+      name: string;
+    } | null;
+  }
+  export type QuestionStats = {
+  difficulty: string;
+  rootQuestions: number;
+  solvedQuestions: number;
+  totalQuestions: number;
+  totalRounds: number;
+};

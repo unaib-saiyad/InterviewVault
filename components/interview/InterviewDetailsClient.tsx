@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Search, Filter, X, ArrowLeft, MessageSquare, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -14,17 +14,32 @@ import { mockInterview } from './mockData';
 import type { Round, RoundQuestion, FollowUpQuestion } from './mockData';
 import type { QuestionFormData } from './AddQuestionModal';
 import type { RoundFormData } from './AddRoundModal';
+import api from '@/lib/api';
+import { ApiError } from '@/types/apiTypes';
+import type { InterviewDetails, QuestionStats } from '@/types/interviewTypes';
 
-type InterviewDetailsClientProps = {
-  interviewId: string;
-};
-
-type SelectedRound = {
-  round: Round;
-};
-
-export function InterviewDetailsClient({ interviewId }: InterviewDetailsClientProps) {
-  const [interview] = useState(mockInterview);
+export function InterviewDetailsClient( {interviewId}: { interviewId: string }) {
+  const [interview, setInterview] = useState<InterviewDetails>({
+    id: '',
+    company: {
+      _id: '',
+      name: '',
+    },
+    dateOfApplication: '',
+    experienceLevel: '',
+    status: '',
+    overallFeedback: '',
+    overallRating: 0,
+    role: null,
+    source: null,
+  });
+  const [questionStats, setQuestionStats] = useState<QuestionStats>({
+    difficulty: 'easy',
+    rootQuestions: 0,
+    solvedQuestions: 0,
+    totalQuestions: 0,
+    totalRounds: 0,
+  });
   const [selectedRound, setSelectedRound] = useState<Round | null>(null);
   const [showQuestions, setShowQuestions] = useState(false);
   const [showAddQuestionModal, setShowAddQuestionModal] = useState(false);
@@ -34,6 +49,22 @@ export function InterviewDetailsClient({ interviewId }: InterviewDetailsClientPr
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [currentQuestions, setCurrentQuestions] = useState<(RoundQuestion | FollowUpQuestion)[]>([]);
+
+  useEffect(() => {
+    const fetchInterview = async () => {
+      try {
+        const response = await api.get(`/interviews/${interviewId}`);
+        console.log('Fetched interview:', response.data.data);
+        const {interview, interviewRounds, questionStats } = response.data.data;
+        setInterview(interview);
+        setQuestionStats(questionStats as QuestionStats);
+      } catch (error) {
+        const apiError = error as ApiError;
+        console.error('Failed to fetch interview:', apiError.message);
+      }
+    };
+    fetchInterview();
+  }, [interviewId]);
 
   const handleViewQuestions = (round: Round) => {
     setSelectedRound(round);
@@ -129,12 +160,11 @@ export function InterviewDetailsClient({ interviewId }: InterviewDetailsClientPr
     <div className="space-y-6 sm:space-y-8">
       {/* Interview Header */}
       <InterviewHeader interview={interview} />
-
       {/* Stats */}
-      <InterviewStats rounds={interview.rounds} />
+      <InterviewStats statistics={questionStats} />
 
       {/* Timeline */}
-      <RoundTimeline rounds={interview.rounds} />
+      <RoundTimeline rounds={mockInterview.rounds} />
 
       {/* Questions Section or Rounds Section */}
       <AnimatePresence mode="wait">
@@ -311,7 +341,7 @@ export function InterviewDetailsClient({ interviewId }: InterviewDetailsClientPr
                 <div>
                   <h2 className="text-base font-semibold text-gray-900">Interview Rounds</h2>
                   <p className="text-sm text-gray-500 mt-0.5">
-                    {interview.rounds.length} round{interview.rounds.length !== 1 ? 's' : ''} completed
+                    {mockInterview.rounds.length} round{mockInterview.rounds.length !== 1 ? 's' : ''} completed
                   </p>
                 </div>
                 <button
@@ -323,7 +353,7 @@ export function InterviewDetailsClient({ interviewId }: InterviewDetailsClientPr
                 </button>
               </div>
               <div className="px-5 py-5 sm:px-6 sm:py-6 space-y-3 sm:space-y-4">
-                {interview.rounds.map((round) => (
+                {mockInterview.rounds.map((round) => (
                   <RoundCard
                     key={round.id}
                     round={round}

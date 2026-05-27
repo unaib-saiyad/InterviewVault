@@ -48,6 +48,10 @@ const interviewSchema = new mongoose.Schema(
         source: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Source"
+        },
+        dateOfApplication: {
+            type: Date,
+            default: Date.now
         }
     },
     { timestamps: true }
