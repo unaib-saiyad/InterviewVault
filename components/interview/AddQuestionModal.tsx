@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import QuestionTypeSelector from './QuestionTypeSelector';
+import type { QuestionTypeOption } from '@/types/questionTypes';
 
 type AddQuestionModalProps = {
   isOpen: boolean;
@@ -14,11 +16,12 @@ type AddQuestionModalProps = {
 
 export type QuestionFormData = {
   question: string;
-  type: string;
+  type: QuestionTypeOption | null;
   difficulty: string;
   answer: string;
   notes: string;
   solved: boolean;
+  confidenceScore?: 1 | 2 | 3 | 4 | 5;
 };
 
 const questionTypes = [
@@ -39,14 +42,15 @@ const difficultyLevels = [
 export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionText }: AddQuestionModalProps) {
   const [formData, setFormData] = useState<QuestionFormData>({
     question: '',
-    type: 'technical',
+    type: null,
     difficulty: 'medium',
     answer: '',
     notes: '',
     solved: false,
+    confidenceScore: 3,
   });
 
-  const handleChange = (field: keyof QuestionFormData, value: string | boolean) => {
+  const handleChange = (field: keyof QuestionFormData, value: string | boolean | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -56,11 +60,12 @@ export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionText
     onSubmit(formData);
     setFormData({
       question: '',
-      type: 'technical',
+      type: null,
       difficulty: 'medium',
       answer: '',
       notes: '',
       solved: false,
+      confidenceScore: 3,
     });
   };
 
@@ -146,23 +151,10 @@ export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionText
 
                 {/* Type and Difficulty */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Type
-                    </label>
-                    <select
-                      id="type"
-                      value={formData.type}
-                      onChange={(e) => handleChange('type', e.target.value)}
-                      className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-xs focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all duration-200"
-                    >
-                      {questionTypes.map((t) => (
-                        <option key={t.value} value={t.value}>
-                          {t.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <QuestionTypeSelector
+                    value={formData.type}
+                    onChange={(type) => setFormData((prev) => ({ ...prev, type }))}
+                  />
                   <div>
                     <label htmlFor="difficulty" className="block text-sm font-medium text-gray-700 mb-1.5">
                       Difficulty
@@ -194,6 +186,7 @@ export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionText
                     onChange={(e) => handleChange('answer', e.target.value)}
                     placeholder="Write the ideal answer or solution..."
                     className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 shadow-xs focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all duration-200 resize-none"
+                      required
                   />
                 </div>
 
@@ -233,6 +226,29 @@ export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionText
                     Mark as solved
                   </span>
                 </div>
+
+                {/* Confidence Score */}
+                <div
+                  className="flex items-center gap-3"
+                  title="Indicates how confident you are about this question. Useful for prioritization and review."
+                >
+                  <label htmlFor="confidence" className="block text-sm font-medium text-gray-700">
+                    Confidence
+                  </label>
+                  <select
+                    id="confidence"
+                    value={formData.confidenceScore}
+                    onChange={(e) => handleChange('confidenceScore', parseInt(e.target.value))}
+                    className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 shadow-xs focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all duration-200"
+                  >
+                    <option value={1}>No Idea</option>
+                    <option value={2}>Weak</option>
+                    <option value={3}>Moderate</option>
+                    <option value={4}>Good</option>
+                    <option value={5}>Mastered</option>
+                  </select>
+                </div>
+
 
                 {/* Actions */}
                 <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">

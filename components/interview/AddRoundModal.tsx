@@ -7,28 +7,31 @@ import { X, Save, RotateCcw } from 'lucide-react';
 type AddRoundModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  roundNumber: number;
   onSubmit: (data: RoundFormData) => void;
 };
 
 export type RoundFormData = {
   roundNumber: number;
-  type: string;
+  roundType: string;
   interviewDate: string;
-  duration: string;
+  durationInMinutes: number;
   difficulty: string;
   interviewerName: string;
   feedback: string;
-  quickNotes: string;
+  result: string;
 };
 
 const roundTypes = [
+  { value: 'telephonic', label: 'Telephonic' },
+  { value: 'online_assessment', label: 'Online Assessment' },
   { value: 'technical', label: 'Technical' },
-  { value: 'dsa', label: 'DSA' },
+  { value: 'machine_coding', label: 'Machine Coding' },
   { value: 'system_design', label: 'System Design' },
-  { value: 'coding', label: 'Coding' },
-  { value: 'behavioral', label: 'Behavioral' },
   { value: 'hr', label: 'HR' },
   { value: 'managerial', label: 'Managerial' },
+  { value: 'ceo', label: 'CEO Round' },
+  { value: 'other', label: 'Other' },
 ];
 
 const difficultyLevels = [
@@ -37,17 +40,19 @@ const difficultyLevels = [
   { value: 'hard', label: 'Hard' },
 ];
 
-export function AddRoundModal({ isOpen, onClose, onSubmit }: AddRoundModalProps) {
-  const [formData, setFormData] = useState<RoundFormData>({
-    roundNumber: 1,
-    type: 'technical',
-    interviewDate: new Date().toISOString().split('T')[0],
-    duration: '60 min',
-    difficulty: 'medium',
-    interviewerName: '',
-    feedback: '',
-    quickNotes: '',
-  });
+const getInitialFormData = (roundNumber: number): RoundFormData => ({
+  roundNumber,
+  roundType: 'technical',
+  interviewDate: new Date().toISOString().split('T')[0],
+  durationInMinutes: 60,
+  difficulty: 'medium',
+  interviewerName: '',
+  feedback: '',
+  result: 'pending',
+});
+
+export function AddRoundModal({ isOpen, onClose, onSubmit, roundNumber }: AddRoundModalProps) {
+  const [formData, setFormData] = useState<RoundFormData>(getInitialFormData(roundNumber));
 
   const handleChange = (field: keyof RoundFormData, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -58,14 +63,14 @@ export function AddRoundModal({ isOpen, onClose, onSubmit }: AddRoundModalProps)
     if (!formData.interviewerName.trim()) return;
     onSubmit(formData);
     setFormData({
-      roundNumber: 1,
-      type: 'technical',
+      roundNumber: roundNumber,
+      roundType: 'technical',
       interviewDate: new Date().toISOString().split('T')[0],
-      duration: '60 min',
+      durationInMinutes: 60,
       difficulty: 'medium',
       interviewerName: '',
       feedback: '',
-      quickNotes: '',
+      result: 'pending',
     });
   };
 
@@ -86,7 +91,7 @@ export function AddRoundModal({ isOpen, onClose, onSubmit }: AddRoundModalProps)
       document.body.style.overflow = '';
     };
   }, [isOpen, handleKeyDown]);
-
+  console.log('Rendering AddRoundModal with roundNumber:', formData.roundNumber);
   return (
     <AnimatePresence>
       {isOpen && (
@@ -130,9 +135,10 @@ export function AddRoundModal({ isOpen, onClose, onSubmit }: AddRoundModalProps)
                       type="number"
                       min={1}
                       value={formData.roundNumber}
-                      onChange={(e) => handleChange('roundNumber', parseInt(e.target.value) || 1)}
+                      // onChange={(e) => handleChange('roundNumber', parseInt(e.target.value) || 1)}
                       className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-xs focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all duration-200"
-                    />
+                      readOnly
+                   />
                   </div>
                   <div>
                     <label htmlFor="roundType" className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -140,8 +146,8 @@ export function AddRoundModal({ isOpen, onClose, onSubmit }: AddRoundModalProps)
                     </label>
                     <select
                       id="roundType"
-                      value={formData.type}
-                      onChange={(e) => handleChange('type', e.target.value)}
+                      value={formData.roundType}
+                      onChange={(e) => handleChange('roundType', e.target.value)}
                       className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-xs focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all duration-200"
                     >
                       {roundTypes.map((t) => (
@@ -173,16 +179,20 @@ export function AddRoundModal({ isOpen, onClose, onSubmit }: AddRoundModalProps)
                     </label>
                     <select
                       id="duration"
-                      value={formData.duration}
-                      onChange={(e) => handleChange('duration', e.target.value)}
+                      value={formData.durationInMinutes}
+                      onChange={(e) => handleChange('durationInMinutes', parseInt(e.target.value) || 30)}
                       className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-xs focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all duration-200"
                     >
-                      <option value="30 min">30 min</option>
-                      <option value="45 min">45 min</option>
-                      <option value="60 min">60 min</option>
-                      <option value="75 min">75 min</option>
-                      <option value="90 min">90 min</option>
-                      <option value="120 min">120 min</option>
+                      <option value={15}>15 min</option>
+                      <option value={30}>30 min</option>
+                      <option value={45}>45 min</option>
+                      <option value={60}>60 min</option>
+                      <option value={75}>75 min</option>
+                      <option value={90}>90 min</option>
+                      <option value={120}>120 min</option>
+                      <option value={150}>150 min</option>
+                      <option value={180}>180 min</option>
+                      <option value={240}>240 min</option>
                     </select>
                   </div>
                 </div>
@@ -222,6 +232,24 @@ export function AddRoundModal({ isOpen, onClose, onSubmit }: AddRoundModalProps)
                   </div>
                 </div>
 
+                {/* Result */}
+                <div>
+                  <label htmlFor="result" className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Result
+                  </label>
+                  <select
+                    id="result"
+                    value={formData.result}
+                    onChange={(e) => handleChange('result', e.target.value)}
+                    className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-xs focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all duration-200"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="cleared">Cleared</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="on_hold">On Hold</option>
+                  </select>
+                </div>
+
                 {/* Feedback */}
                 <div>
                   <label htmlFor="feedback" className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -234,21 +262,6 @@ export function AddRoundModal({ isOpen, onClose, onSubmit }: AddRoundModalProps)
                     onChange={(e) => handleChange('feedback', e.target.value)}
                     placeholder="Overall feedback for this round..."
                     className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 shadow-xs focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all duration-200 resize-none"
-                  />
-                </div>
-
-                {/* Quick Notes */}
-                <div>
-                  <label htmlFor="quickNotes" className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Quick Notes
-                  </label>
-                  <input
-                    id="quickNotes"
-                    type="text"
-                    value={formData.quickNotes}
-                    onChange={(e) => handleChange('quickNotes', e.target.value)}
-                    placeholder="Key observations..."
-                    className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 shadow-xs focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all duration-200"
                   />
                 </div>
 

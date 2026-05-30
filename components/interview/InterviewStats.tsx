@@ -4,11 +4,7 @@ import { motion } from 'framer-motion';
 import { BarChart3, Brain, CheckCircle2, Layers, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Round } from './mockData';
-import type { QuestionStats } from '@/types/interviewTypes';
-
-type InterviewStatsProps = {
-  rounds: Round[];
-};
+import type { InterviewRoundDetails, QuestionStats } from '@/types/interviewTypes';
 
 type StatCardProps = {
   icon: React.ElementType;
@@ -81,7 +77,7 @@ export function InterviewStats({ statistics }: { statistics: QuestionStats }) {
 }
 
 // Timeline/progress indicator
-export function RoundTimeline({ rounds }: { rounds: Round[] }) {
+export function RoundTimeline({ rounds }: { rounds: InterviewRoundDetails[] }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -93,12 +89,12 @@ export function RoundTimeline({ rounds }: { rounds: Round[] }) {
       <div className="flex items-center gap-1 sm:gap-2">
         {rounds.map((round, index) => {
           const isCleared = round.result === 'cleared';
-          const isFailed = round.result === 'failed';
+          const isFailed = round.result === 'rejected';
           const isPending = round.result === 'pending';
-          const isPartial = round.result === 'partial';
+          const isPartial = round.result === 'on_hold';
 
           return (
-            <div key={round.id} className="flex-1 flex flex-col items-center">
+            <div key={round._id} className="flex-1 flex flex-col items-center">
               <div className="flex items-center w-full" title={round.result.charAt(0).toUpperCase() + round.result.slice(1)}>
                 {/* Connecting line before */}
                 {index > 0 && (
@@ -120,8 +116,8 @@ export function RoundTimeline({ rounds }: { rounds: Round[] }) {
                       : isFailed
                         ? 'border-red-400 bg-red-50'
                         : isPartial
-                          ? 'border-orange-400 bg-orange-50'
-                          : 'border-gray-300 bg-white'
+                          ? 'border-amber-400 bg-amber-50'
+                          : 'border-gray-400 bg-gray-50'
                   )}
                 >
                   <span
@@ -150,7 +146,7 @@ export function RoundTimeline({ rounds }: { rounds: Round[] }) {
                 )}
               </div>
               <span className="mt-1.5 text-[10px] sm:text-xs font-medium text-gray-500 capitalize truncate max-w-[60px] sm:max-w-none text-center">
-                {round.type.replace('_', ' ')}
+                {round.roundType.replace('_', ' ')}
               </span>
             </div>
           );

@@ -18,12 +18,12 @@ import { cn } from '@/lib/utils';
 import { RoundResultBadge } from './StatusBadge';
 import { DifficultyBadge, RoundTypeBadge } from './DifficultyBadge';
 import type { Round } from './mockData';
-
+import type { InterviewRoundDetails } from '@/types/interviewTypes';
 type RoundCardProps = {
-  round: Round;
-  onViewQuestions: (round: Round) => void;
-  onAddQuestion: (round: Round) => void;
-  onEditRound: (round: Round) => void;
+  round: InterviewRoundDetails;
+  onViewQuestions: (round: InterviewRoundDetails) => void;
+  onAddQuestion: (round: InterviewRoundDetails) => void;
+  onEditRound: (round: InterviewRoundDetails) => void;
 };
 
 export function RoundCard({ round, onViewQuestions, onAddQuestion, onEditRound }: RoundCardProps) {
@@ -54,10 +54,10 @@ export function RoundCard({ round, onViewQuestions, onAddQuestion, onEditRound }
             <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-brand-50 border border-brand-100 shrink-0">
               <span className="text-lg font-bold text-brand-600">{round.roundNumber}</span>
             </div>
-
+ 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-1">
-                <RoundTypeBadge type={round.type} />
+                <RoundTypeBadge type={round.roundType} />
                 <DifficultyBadge difficulty={round.difficulty} />
                 <RoundResultBadge result={round.result} />
               </div>
@@ -68,16 +68,16 @@ export function RoundCard({ round, onViewQuestions, onAddQuestion, onEditRound }
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5 text-gray-400" />
-                  <span>{round.duration}</span>
+                  <span>{round.durationInMinutes} mins</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <User className="h-3.5 w-3.5 text-gray-400" />
                   <span className="truncate">{round.interviewerName}</span>
                 </div>
-                <div className="flex items-center gap-1">
+                {/* <div className="flex items-center gap-1">
                   <MessageSquare className="h-3.5 w-3.5 text-gray-400" />
                   <span>{round.questions.length} questions</span>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -110,17 +110,9 @@ export function RoundCard({ round, onViewQuestions, onAddQuestion, onEditRound }
               {round.feedback && (
                 <div>
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Feedback</h4>
-                  <p className="text-sm text-gray-700 leading-relaxed">{round.feedback}</p>
-                </div>
-              )}
-
-              {/* Quick Notes */}
-              {round.quickNotes && (
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Quick Notes</h4>
                   <div className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
                     <FileText className="h-3.5 w-3.5 text-amber-600" />
-                    <p className="text-sm text-amber-800">{round.quickNotes}</p>
+                    <p className="text-sm text-amber-800">{round.feedback}</p>
                   </div>
                 </div>
               )}

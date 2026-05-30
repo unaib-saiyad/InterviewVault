@@ -33,7 +33,7 @@ api.interceptors.response.use(
       }
       catch(error){
         localStorage.removeItem("accessToken");
-        window.location.href = 'auth/login?sessionExpired=true';
+        window.location.href = '/auth/login?sessionExpired=true';
       }
     }
     const formatedError: ApiError = {

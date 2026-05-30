@@ -16,7 +16,7 @@ import type { QuestionFormData } from './AddQuestionModal';
 import type { RoundFormData } from './AddRoundModal';
 import api from '@/lib/api';
 import { ApiError } from '@/types/apiTypes';
-import type { InterviewDetails, QuestionStats } from '@/types/interviewTypes';
+import type { InterviewDetails, QuestionStats, InterviewRoundDetails } from '@/types/interviewTypes';
 
 export function InterviewDetailsClient( {interviewId}: { interviewId: string }) {
   const [interview, setInterview] = useState<InterviewDetails>({
@@ -40,7 +40,8 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     totalQuestions: 0,
     totalRounds: 0,
   });
-  const [selectedRound, setSelectedRound] = useState<Round | null>(null);
+  const [interviewRounds, setInterviewRounds] = useState<InterviewRoundDetails[]>([]);
+  const [selectedRound, setSelectedRound] = useState<InterviewRoundDetails | null>(null);
   const [showQuestions, setShowQuestions] = useState(false);
   const [showAddQuestionModal, setShowAddQuestionModal] = useState(false);
   const [showAddRoundModal, setShowAddRoundModal] = useState(false);
@@ -58,6 +59,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
         const {interview, interviewRounds, questionStats } = response.data.data;
         setInterview(interview);
         setQuestionStats(questionStats as QuestionStats);
+        setInterviewRounds(interviewRounds);
       } catch (error) {
         const apiError = error as ApiError;
         console.error('Failed to fetch interview:', apiError.message);
@@ -66,19 +68,19 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     fetchInterview();
   }, [interviewId]);
 
-  const handleViewQuestions = (round: Round) => {
+  const handleViewQuestions = (round: InterviewRoundDetails) => {
     setSelectedRound(round);
-    setCurrentQuestions(round.questions as unknown as (RoundQuestion | FollowUpQuestion)[]);
+    // setCurrentQuestions(round.questions as unknown as (RoundQuestion | FollowUpQuestion)[]);
     setShowQuestions(true);
   };
 
-  const handleBackToRounds = () => {
+  const handleBackToRounds = () => { 
     setShowQuestions(false);
     setSelectedRound(null);
     setCurrentQuestions([]);
   };
 
-  const handleAddQuestionClick = (round: Round) => {
+  const handleAddQuestionClick = (round: InterviewRoundDetails) => {
     setSelectedRound(round);
     setParentQuestionId(null);
     setParentQuestionText(undefined);
@@ -104,18 +106,61 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     setShowAddQuestionModal(true);
   };
 
-  const handleAddQuestionSubmit = (data: QuestionFormData) => {
-    // In a real app, this would call an API
-    console.log('New question:', { ...data, parentId: parentQuestionId, roundId: selectedRound?.id });
+  const handleAddQuestionSubmit = async (data: QuestionFormData) => {
+    
+    try{
+      const response = await api.post("/interviews/questions", {
+        ...data,
+        parentQuestion: parentQuestionId,
+        round: selectedRound?._id,
+      });
+      const newQuestion = response.data.data;
+      // if (parentQuestionId) {
+      //   // Adding a follow-up question
+      //   const addFollowUpToTree = (questions: (RoundQuestion | FollowUpQuestion)[]): (RoundQuestion | FollowUpQuestion)[] => {
+      //     return questions.map((q) => {
+      //       if (q.id === parentQuestionId) {
+      //         if ('followUps' in q) {
+      //           const updatedFollowUps = [...(q as RoundQuestion).followUps, newQuestion];
+      //           return { ...q, followUps: updatedFollowUps } as RoundQuestion;
+      //         } else {
+      //           const updatedChildren = [...(q as FollowUpQuestion).children, newQuestion];
+      //           return { ...q, children: updatedChildren } as FollowUpQuestion;
+      //         }
+      //       }
+      //       const children = 'followUps' in q
+      //         ? addFollowUpToTree((q as RoundQuestion).followUps as unknown as (RoundQuestion | FollowUpQuestion)[])
+      //         : addFollowUpToTree((q as FollowUpQuestion).children as unknown as (RoundQuestion | FollowUpQuestion)[]);
+      //     });
+      //   };
+      //   setCurrentQuestions((prev) => addFollowUpToTree(prev));
+      // }
+      // else {
+      //   // Adding a root question
+        setCurrentQuestions((prev) => [...prev, newQuestion]);
+      // }
+    }
+    catch(error){
+      alert("Failed to add question. Please try again.");
+      console.error('Failed to add question:', error);
+    }
+
+    console.log('New question:', { ...data, parentQuestion: parentQuestionId, round: selectedRound?._id });
     setShowAddQuestionModal(false);
     setParentQuestionId(null);
     setParentQuestionText(undefined);
   };
 
-  const handleAddRoundSubmit = (data: RoundFormData) => {
-    // In a real app, this would call an API
-    console.log('New round:', data);
-    setShowAddRoundModal(false);
+  const handleAddRoundSubmit = async (data: RoundFormData) => {
+    try {
+      const response = await api.post(`/interviews/rounds/${interviewId}`, data);
+      setInterviewRounds((prev) => [...prev, response.data.data]);
+      alert("Round added successfully!");
+      setShowAddRoundModal(false);
+    } catch (error) {
+      alert("Failed to add round. Please try again.");
+      console.error('Failed to add interview round:', error);
+    }
   };
 
   const handleEditQuestion = (question: any) => {
@@ -144,7 +189,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     setCurrentQuestions(toggleInTree(currentQuestions));
   };
 
-  const handleEditRound = (round: Round) => {
+  const handleEditRound = (round: InterviewRoundDetails) => {
     console.log('Edit round:', round);
   };
 
@@ -164,7 +209,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
       <InterviewStats statistics={questionStats} />
 
       {/* Timeline */}
-      <RoundTimeline rounds={mockInterview.rounds} />
+      <RoundTimeline rounds={interviewRounds} />
 
       {/* Questions Section or Rounds Section */}
       <AnimatePresence mode="wait">
@@ -191,7 +236,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
                     </button>
                     <div className="h-5 w-px bg-gray-200" />
                     <span className="text-sm font-medium text-gray-700">
-                      Round {selectedRound.roundNumber} - {selectedRound.type.replace('_', ' ')}
+                      Round {selectedRound.roundNumber} - {selectedRound.roundType.replace('_', ' ')}
                     </span>
                   </div>
 
@@ -341,7 +386,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
                 <div>
                   <h2 className="text-base font-semibold text-gray-900">Interview Rounds</h2>
                   <p className="text-sm text-gray-500 mt-0.5">
-                    {mockInterview.rounds.length} round{mockInterview.rounds.length !== 1 ? 's' : ''} completed
+                    {interviewRounds.length} round{interviewRounds.length !== 1 ? 's' : ''} completed
                   </p>
                 </div>
                 <button
@@ -353,9 +398,9 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
                 </button>
               </div>
               <div className="px-5 py-5 sm:px-6 sm:py-6 space-y-3 sm:space-y-4">
-                {mockInterview.rounds.map((round) => (
+                {interviewRounds.map((round) => (
                   <RoundCard
-                    key={round.id}
+                    key={round._id}
                     round={round}
                     onViewQuestions={handleViewQuestions}
                     onAddQuestion={handleAddQuestionClick}
@@ -368,7 +413,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
         )}
       </AnimatePresence>
 
-      {/* Modals */}
+      {/* Modals */} 
       <AddQuestionModal
         isOpen={showAddQuestionModal}
         onClose={() => {
@@ -383,6 +428,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
       <AddRoundModal
         isOpen={showAddRoundModal}
         onClose={() => setShowAddRoundModal(false)}
+        roundNumber={ questionStats.totalRounds + 1 }
         onSubmit={handleAddRoundSubmit}
       />
     </div>

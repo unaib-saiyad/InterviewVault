@@ -14,23 +14,20 @@ const questionSchema = new mongoose.Schema(
       default: null
     },
 
+    sequence: {
+      type: String,
+      required: true
+    },
+
     question: {
       type: String,
       required: true
     },
 
     questionType: {
-      type: String,
-      enum: [
-        "dsa",
-        "javascript",
-        "react",
-        "nodejs",
-        "mongodb",
-        "system_design",
-        "hr",
-        "behavioral"
-      ]
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "QuestionType",
+      required: true
     },
 
     difficulty: {
@@ -52,6 +49,13 @@ const questionSchema = new mongoose.Schema(
       default: false
     },
 
+    confidenceScore: {
+      type: Number,
+      min: 1,
+      max: 5,
+      default: 3
+    },
+
     depth: {
       type: Number,
       default: 0
@@ -62,7 +66,12 @@ const questionSchema = new mongoose.Schema(
 
 questionSchema.index({
   round: 1,
-  parentQuestion: 1
+  sequence: 1
+});
+
+questionSchema.index({
+  parentQuestion: 1,
+  sequence: 1
 });
 
 questionSchema.index({

@@ -104,3 +104,16 @@ export type InterviewData = {
   totalQuestions: number;
   totalRounds: number;
 };
+
+export type InterviewRoundDetails = {
+  _id: string;
+  interviewId: string;
+  roundNumber: number;
+  roundType: string;
+  interviewerName: string;
+  durationInMinutes: number;
+  interviewDate: string;
+  result: string;
+  feedback: string;
+  difficulty: string;
+};

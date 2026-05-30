@@ -13,13 +13,15 @@ const interviewRoundSchema = new mongoose.Schema(
         roundType: {
             type: String,
             enum: [
+                "telephonic",
                 "online_assessment",
                 "technical",
                 "machine_coding",
                 "system_design",
                 "hr",
                 "managerial",
-                "ceo"
+                "ceo",
+                "other"
             ]
         },
 
@@ -31,7 +33,8 @@ const interviewRoundSchema = new mongoose.Schema(
 
         result: {
             type: String,
-            enum: ["pending", "cleared", "rejected"]
+            enum: ["pending", "cleared", "rejected", "on_hold"],
+            default: "pending"
         },
 
         feedback: String,
