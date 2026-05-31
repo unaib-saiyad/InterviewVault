@@ -9,6 +9,8 @@ import companyRoutes from './routes.js/company.routes.js';
 import roleRoutes from './routes.js/role.routes.js';
 import sourceRoutes from './routes.js/source.routes.js';
 import interviewRoutes from './routes.js/interview.routes.js';
+import interviewRoundRoutes from './routes.js/interviewRound..routes.js';
+import interviewQuestionRoutes from './routes.js/interviewQuestion.routes.js';
 
 dotenv.config();
 
@@ -32,7 +34,8 @@ app.use('/api/companies', companyRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/sources', sourceRoutes);
 app.use('/api/interviews', interviewRoutes);
-
+app.use('/api/interviews/rounds', interviewRoundRoutes);
+app.use('/api/interviews/questions', interviewQuestionRoutes);
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

@@ -24,7 +24,8 @@ export function AddInterviewModal({ isOpen, onClose }: AddInterviewModalProps) {
     status: InterviewStatus.Applied,
     overallFeedback: '',
     overallRating: 0,
-    source: null
+    source: null,
+    dateOfApplication: new Date()
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,7 +38,7 @@ export function AddInterviewModal({ isOpen, onClose }: AddInterviewModalProps) {
     try{
       await api.post("/interviews", formData)
       alert("Interview added successfully!");
-      setFormData({ company: null, role: null, experienceLevel: ExperienceLevel.Fresher, status: InterviewStatus.Applied, overallFeedback: '', overallRating: 0, source: null });
+      setFormData({ company: null, role: null, experienceLevel: ExperienceLevel.Fresher, status: InterviewStatus.Applied, overallFeedback: '', overallRating: 0, source: null, dateOfApplication: new Date() });
       onClose();
     } catch(error) {
       console.error("Error adding interview:", error);
@@ -46,7 +47,7 @@ export function AddInterviewModal({ isOpen, onClose }: AddInterviewModalProps) {
   };
 
   const handleClose = () => {
-    setFormData({ company: null, role: null, experienceLevel: ExperienceLevel.Fresher, status: InterviewStatus.Applied, overallFeedback: '', overallRating: 0, source: null });
+    setFormData({ company: null, role: null, experienceLevel: ExperienceLevel.Fresher, status: InterviewStatus.Applied, overallFeedback: '', overallRating: 0, source: null, dateOfApplication: new Date() });
     onClose();
   };
 
@@ -235,6 +236,22 @@ export function AddInterviewModal({ isOpen, onClose }: AddInterviewModalProps) {
                       value={formData.source}
                       onChange={(source) => setFormData({ ...formData, source })}
                     />
+                  </div>
+                  <div>
+                    <label htmlFor="dateOfApplication" className="block text-sm font-medium text-gray-700 mb-2">
+                      Date of Application
+                    </label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="date"
+                        id="dateOfApplication"
+                        name='dateOfApplication'
+                        value={formData.dateOfApplication ? formData.dateOfApplication.toISOString().split('T')[0] : ''}
+                        onChange={(e) => setFormData({ ...formData, dateOfApplication: e.target.value ? new Date(e.target.value) : null })}
+                        className="w-full rounded-xl border border-gray-300 pl-10 pr-4 py-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-colors duration-200"
+                      />
+                    </div>
                   </div>
                 </div>
 
