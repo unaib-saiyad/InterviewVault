@@ -30,6 +30,8 @@ const questionSchema = new mongoose.Schema(
       required: true
     },
 
+    // topic: String, Must be implement
+
     difficulty: {
       type: String,
       enum: [

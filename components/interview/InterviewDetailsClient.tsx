@@ -3,20 +3,19 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Search, Filter, X, ArrowLeft, MessageSquare, ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { InterviewHeader } from './InterviewHeader';
 import { InterviewStats, RoundTimeline } from './InterviewStats';
 import { RoundCard } from './RoundCard';
 import { QuestionCard } from './QuestionCard';
 import { AddQuestionModal } from './AddQuestionModal';
 import { AddRoundModal } from './AddRoundModal';
-import { mockInterview } from './mockData';
-import type { Round, RoundQuestion, FollowUpQuestion } from './mockData';
+import type { RoundQuestion, FollowUpQuestion } from './mockData';
 import type { QuestionFormData } from './AddQuestionModal';
 import type { RoundFormData } from './AddRoundModal';
 import api from '@/lib/api';
 import { ApiError } from '@/types/apiTypes';
 import type { InterviewDetails, QuestionStats, InterviewRoundDetails } from '@/types/interviewTypes';
+import type { InterviewQuestionDetails } from '@/types/questionTypes';
 
 export function InterviewDetailsClient( {interviewId}: { interviewId: string }) {
   const [interview, setInterview] = useState<InterviewDetails>({
@@ -49,7 +48,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
   const [parentQuestionText, setParentQuestionText] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
-  const [currentQuestions, setCurrentQuestions] = useState<(RoundQuestion | FollowUpQuestion)[]>([]);
+  const [currentQuestions, setCurrentQuestions] = useState<InterviewQuestionDetails[]>([]);
 
   useEffect(() => {
     const fetchInterview = async () => {
@@ -68,10 +67,19 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     fetchInterview();
   }, [interviewId]);
 
-  const handleViewQuestions = (round: InterviewRoundDetails) => {
+  const handleViewQuestions = async (round: InterviewRoundDetails) => {
     setSelectedRound(round);
-    // setCurrentQuestions(round.questions as unknown as (RoundQuestion | FollowUpQuestion)[]);
-    setShowQuestions(true);
+    try{
+      const response = await api.get(`/interviews/questions/round/${round._id}`);
+      console.log('Fetched questions for round:', response.data.data);
+      setCurrentQuestions(response.data.data);
+      setShowQuestions(true);
+    }
+    catch(error){
+      alert("Failed to fetch questions for this round. Please try again.");
+      console.error('Failed to fetch questions for round:', error);
+      setSelectedRound(null);
+    }
   };
 
   const handleBackToRounds = () => { 
@@ -88,22 +96,22 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
   };
 
   const handleAddFollowUpQuestion = (questionId: string) => {
-    setParentQuestionId(questionId);
-    // Find the question text from the current questions
-    const findQuestionText = (questions: (RoundQuestion | FollowUpQuestion)[], id: string): string | undefined => {
-      for (const q of questions) {
-        if (q.id === id) return q.question;
-        const children = 'followUps' in q ? (q as RoundQuestion).followUps : (q as FollowUpQuestion).children;
-        if (children) {
-          const found = findQuestionText(children as (RoundQuestion | FollowUpQuestion)[], id);
-          if (found) return found;
-        }
-      }
-      return undefined;
-    };
-    const text = findQuestionText(currentQuestions, questionId);
-    setParentQuestionText(text);
-    setShowAddQuestionModal(true);
+    // setParentQuestionId(questionId);
+    // // Find the question text from the current questions
+    // const findQuestionText = (questions: (RoundQuestion | FollowUpQuestion)[], id: string): string | undefined => {
+    //   for (const q of questions) {
+    //     if (q.id === id) return q.question;
+    //     const children = 'followUps' in q ? (q as RoundQuestion).followUps : (q as FollowUpQuestion).children;
+    //     if (children) {
+    //       const found = findQuestionText(children as (RoundQuestion | FollowUpQuestion)[], id);
+    //       if (found) return found;
+    //     }
+    //   }
+    //   return undefined;
+    // };
+    // const text = findQuestionText(currentQuestions, questionId);
+    // setParentQuestionText(text);
+    // setShowAddQuestionModal(true);
   };
 
   const handleAddQuestionSubmit = async (data: QuestionFormData) => {
@@ -115,30 +123,32 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
         round: selectedRound?._id,
       });
       const newQuestion = response.data.data;
-      // if (parentQuestionId) {
-      //   // Adding a follow-up question
-      //   const addFollowUpToTree = (questions: (RoundQuestion | FollowUpQuestion)[]): (RoundQuestion | FollowUpQuestion)[] => {
-      //     return questions.map((q) => {
-      //       if (q.id === parentQuestionId) {
-      //         if ('followUps' in q) {
-      //           const updatedFollowUps = [...(q as RoundQuestion).followUps, newQuestion];
-      //           return { ...q, followUps: updatedFollowUps } as RoundQuestion;
-      //         } else {
-      //           const updatedChildren = [...(q as FollowUpQuestion).children, newQuestion];
-      //           return { ...q, children: updatedChildren } as FollowUpQuestion;
-      //         }
-      //       }
-      //       const children = 'followUps' in q
-      //         ? addFollowUpToTree((q as RoundQuestion).followUps as unknown as (RoundQuestion | FollowUpQuestion)[])
-      //         : addFollowUpToTree((q as FollowUpQuestion).children as unknown as (RoundQuestion | FollowUpQuestion)[]);
-      //     });
-      //   };
-      //   setCurrentQuestions((prev) => addFollowUpToTree(prev));
-      // }
-      // else {
-      //   // Adding a root question
-        setCurrentQuestions((prev) => [...prev, newQuestion]);
-      // }
+      if(showQuestions){
+        // if (parentQuestionId) {
+        //   // Adding a follow-up question
+        //   const addFollowUpToTree = (questions: (RoundQuestion | FollowUpQuestion)[]): (RoundQuestion | FollowUpQuestion)[] => {
+        //     return questions.map((q) => {
+        //       if (q.id === parentQuestionId) {
+        //         if ('followUps' in q) {
+        //           const updatedFollowUps = [...(q as RoundQuestion).followUps, newQuestion];
+        //           return { ...q, followUps: updatedFollowUps } as RoundQuestion;
+        //         } else {
+        //           const updatedChildren = [...(q as FollowUpQuestion).children, newQuestion];
+        //           return { ...q, children: updatedChildren } as FollowUpQuestion;
+        //         }
+        //       }
+        //       const children = 'followUps' in q
+        //         ? addFollowUpToTree((q as RoundQuestion).followUps as unknown as (RoundQuestion | FollowUpQuestion)[])
+        //         : addFollowUpToTree((q as FollowUpQuestion).children as unknown as (RoundQuestion | FollowUpQuestion)[]);
+        //     });
+        //   };
+        //   setCurrentQuestions((prev) => addFollowUpToTree(prev));
+        // }
+        // else {
+        //   // Adding a root question
+          setCurrentQuestions((prev) => [...prev, newQuestion]);
+        // }
+      }
     }
     catch(error){
       alert("Failed to add question. Please try again.");
@@ -172,18 +182,13 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
   };
 
   const handleToggleSolved = (questionId: string) => {
-    const toggleInTree = (questions: (RoundQuestion | FollowUpQuestion)[]): (RoundQuestion | FollowUpQuestion)[] => {
+    const toggleInTree = (questions: InterviewQuestionDetails[]): InterviewQuestionDetails[] => {
       return questions.map((q) => {
-        if (q.id === questionId) {
+        if (q._id === questionId) {
           return { ...q, solved: !q.solved };
         }
-        const children = 'followUps' in q
-          ? toggleInTree((q as RoundQuestion).followUps as unknown as (RoundQuestion | FollowUpQuestion)[])
-          : toggleInTree((q as FollowUpQuestion).children as unknown as (RoundQuestion | FollowUpQuestion)[]);
-        if ('followUps' in q) {
-          return { ...q, followUps: children } as RoundQuestion;
-        }
-        return { ...q, children } as FollowUpQuestion;
+        const updatedFollowUps = toggleInTree(q.followUps);
+        return { ...q, followUps: updatedFollowUps };
       });
     };
     setCurrentQuestions(toggleInTree(currentQuestions));
@@ -195,11 +200,11 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
 
   const filteredQuestions = currentQuestions.filter((q) => {
     const matchesSearch = q.question.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterType === 'all' || q.type === filterType;
+    const matchesFilter = filterType === 'all' || q.questionType.name === filterType;
     return matchesSearch && matchesFilter;
   });
 
-  const questionTypes = ['all', ...new Set(currentQuestions.map((q) => q.type))];
+  const questionTypes = ['all', ...new Set(currentQuestions.map((q) => q.questionType.name))];
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -341,7 +346,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
                 <div className="space-y-3">
                   {filteredQuestions.map((question) => (
                     <QuestionCard
-                      key={question.id}
+                      key={question._id}
                       question={question}
                       onAddFollowUp={handleAddFollowUpQuestion}
                       onEdit={handleEditQuestion}

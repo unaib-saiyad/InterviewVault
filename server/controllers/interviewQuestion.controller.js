@@ -32,7 +32,7 @@ export const searchQuestionType = async (req, res) => {
     try {
         const regex = new RegExp(query.toLowerCase().trim().replace(/\s+/g, " "), "i");
         const questionTypes = await QuestionType.find({ normalizedName: regex }).select("_id name description").limit(10);
-        res.json({
+        res.status(200).json({
             code: 'SUCCESS',
             message: 'Question types found',
             data: questionTypes
@@ -92,6 +92,38 @@ export const createQuestion = async (req, res) => {
 
     } catch (error) {
         res.status(400).json({
+            code: 'ERROR',
+            message: error.message
+        });
+    }
+}
+
+export const getQuestionsByRound = async (req, res) => {
+    const { round } = req.params;
+    try {
+        const questions = await Question.find({ round }).populate('questionType', 'name description').sort({ sequence: 1 });
+        const questionMap = {};
+
+        questions.forEach(q => {
+            questionMap[q._id] = { ...q._doc, followUps: [] };
+        });
+        const rootQuestions = [];
+
+        questions.forEach(q => {
+            if (q.parentQuestion) {
+                questionMap[q.parentQuestion]?.followUps.push(questionMap[q._id]);
+            } else {
+                rootQuestions.push(questionMap[q._id]);
+            }
+        });
+
+        res.status(200).json({
+            code: 'SUCCESS',
+            message: 'Questions retrieved successfully',
+            data: rootQuestions
+        });
+    } catch (error) {
+        res.status(500).json({
             code: 'ERROR',
             message: error.message
         });

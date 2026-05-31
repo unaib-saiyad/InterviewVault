@@ -17,10 +17,9 @@ import {
 import { cn } from '@/lib/utils';
 import { DifficultyBadge, QuestionTypeBadge } from './DifficultyBadge';
 import type { RoundQuestion, FollowUpQuestion } from './mockData';
-
+import type { InterviewQuestionDetails } from '@/types/questionTypes';
 type QuestionCardProps = {
-  question: RoundQuestion | FollowUpQuestion;
-  depth?: number;
+  question: InterviewQuestionDetails;
   isFollowUp?: boolean;
   onAddFollowUp: (parentId: string) => void;
   onEdit: (question: any) => void;
@@ -30,7 +29,6 @@ type QuestionCardProps = {
 
 export function QuestionCard({
   question,
-  depth = 0,
   isFollowUp = false,
   onAddFollowUp,
   onEdit,
@@ -40,26 +38,22 @@ export function QuestionCard({
   const [showChildren, setShowChildren] = useState(true);
   const [showAnswer, setShowAnswer] = useState(false);
 
-  const hasChildren = 'followUps' in question
-    ? (question as RoundQuestion).followUps.length > 0
-    : (question as FollowUpQuestion).children.length > 0;
+  const hasChildren = question.followUps.length > 0
 
-  const children = 'followUps' in question
-    ? (question as RoundQuestion).followUps
-    : (question as FollowUpQuestion).children;
+  const children = question.followUps;
 
   return (
     <motion.div
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className={cn('relative', depth > 0 && 'ml-6 sm:ml-8')}
+      className={cn('relative', question.depth > 1 && 'ml-6 sm:ml-8')}
     >
       {/* Tree connection line */}
-      {depth > 0 && (
+      {question.depth > 1 && (
         <div className="absolute -left-6 sm:-left-8 top-0 bottom-0 w-px bg-gray-200" aria-hidden="true" />
       )}
-      {depth > 0 && (
+      {question.depth > 1 && (
         <div className="absolute -left-6 sm:-left-8 top-5 w-6 sm:w-8 h-px bg-gray-200" aria-hidden="true" />
       )}
 
@@ -77,7 +71,7 @@ export function QuestionCard({
           {/* Top row - badges and actions */}
           <div className="flex items-start justify-between gap-3 mb-2">
             <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-              <QuestionTypeBadge type={question.type} />
+              <QuestionTypeBadge type={question.questionType.name} />
               <DifficultyBadge difficulty={question.difficulty} />
               {question.solved ? (
                 <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-xs font-medium text-emerald-700">
@@ -95,7 +89,7 @@ export function QuestionCard({
             {/* Action buttons */}
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <button
-                onClick={() => onAddFollowUp(question.id)}
+                onClick={() => onAddFollowUp(question._id)}
                 className="p-1.5 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-all duration-200"
                 title="Add Follow-up Question"
               >
@@ -109,14 +103,14 @@ export function QuestionCard({
                 <Edit3 className="h-3.5 w-3.5" />
               </button>
               <button
-                onClick={() => onDelete(question.id)}
+                onClick={() => onDelete(question._id)}
                 className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
                 title="Delete"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
               <button
-                onClick={() => onToggleSolved(question.id)}
+                onClick={() => onToggleSolved(question._id)}
                 className={cn(
                   'p-1.5 rounded-lg transition-all duration-200',
                   question.solved
@@ -146,7 +140,7 @@ export function QuestionCard({
               )}
               <span className="inline-flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
-                {new Date(question.createdDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                {new Date((question?.createdAt || question?.updatedAt) ?? new Date()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </span>
             </div>
 
@@ -211,9 +205,8 @@ export function QuestionCard({
             <div className="mt-2 space-y-2">
               {children.map((child) => (
                 <QuestionCard
-                  key={child.id}
+                  key={child._id}
                   question={child}
-                  depth={depth + 1}
                   isFollowUp
                   onAddFollowUp={onAddFollowUp}
                   onEdit={onEdit}
