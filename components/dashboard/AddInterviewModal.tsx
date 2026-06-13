@@ -8,6 +8,7 @@ import CompanySelector from '../interview/CompanySelector';
 import RoleSelector from '../interview/RoleSelector';
 import SourceSelector from '../interview/SourceSelector';
 import api from '@/lib/api';
+import { useToast } from '@/lib/useToast';
 
 type AddInterviewModalProps = {
   isOpen: boolean;
@@ -17,6 +18,7 @@ type AddInterviewModalProps = {
 
 
 export function AddInterviewModal({ isOpen, onClose }: AddInterviewModalProps) {
+  const { showSuccess, showError, showWarning } = useToast();
   const [formData, setFormData] = useState<InterviewData>({
     company: null,
     role: null,
@@ -32,17 +34,17 @@ export function AddInterviewModal({ isOpen, onClose }: AddInterviewModalProps) {
     e.preventDefault();
     // onSubmit(formData);
     if(!formData.company || !formData.role || !formData.source) {
-      alert("Company, Role, and Source are required fields.");
+      showWarning('Validation error', 'Company, Role, and Source are required fields.');
       return;
     }
     try{
       await api.post("/interviews", formData)
-      alert("Interview added successfully!");
+      showSuccess('Interview created', 'Interview added successfully!');
       setFormData({ company: null, role: null, experienceLevel: ExperienceLevel.Fresher, status: InterviewStatus.Applied, overallFeedback: '', overallRating: 0, source: null, dateOfApplication: new Date() });
       onClose();
     } catch(error) {
       console.error("Error adding interview:", error);
-      alert("Failed to add interview. Please try again.");
+      showError('Failed to add interview', 'Failed to add interview. Please try again.');
     }
   };
 

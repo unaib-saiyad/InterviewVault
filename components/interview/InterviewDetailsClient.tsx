@@ -15,8 +15,10 @@ import api from '@/lib/api';
 import { ApiError } from '@/types/apiTypes';
 import type { InterviewDetails, QuestionStats, InterviewRoundDetails } from '@/types/interviewTypes';
 import type { InterviewQuestionDetails } from '@/types/questionTypes';
+import { useToast } from '@/lib/useToast';
 
 export function InterviewDetailsClient( {interviewId}: { interviewId: string }) {
+  const { showSuccess, showError, showWarning, showInfo } = useToast();
   const [interview, setInterview] = useState<InterviewDetails>({
     id: '',
     company: {
@@ -59,6 +61,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
         setInterviewRounds(interviewRounds);
       } catch (error) {
         const apiError = error as ApiError;
+        showError('Failed to load interview', apiError.message);
         console.error('Failed to fetch interview:', apiError.message);
       }
     };
@@ -73,7 +76,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
       setShowQuestions(true);
     }
     catch(error){
-      alert("Failed to fetch questions for this round. Please try again.");
+      showError('Failed to fetch questions', 'Failed to fetch questions for this round. Please try again.');
       console.error('Failed to fetch questions for round:', error);
       setSelectedRound(null);
     }
@@ -148,11 +151,9 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
       }
     }
     catch(error){
-      alert("Failed to add question. Please try again.");
-      console.error('Failed to add question:', error);
+      showError('Failed to add question', 'Failed to add question. Please try again.');
     }
-
-    console.log('New question:', { ...data, parentQuestion: parentQuestionId, round: selectedRound?._id });
+    showSuccess('Question added', 'Question added successfully!');
     setShowAddQuestionModal(false);
     setParentQuestionId(null);
     setParentQuestionText(undefined);
@@ -163,10 +164,10 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
       const response = await api.post(`/interviews/rounds/${interviewId}`, data);
       setInterviewRounds((prev) => [...prev, response.data.data]);
       setQuestionStats((prev) => ({ ...prev, totalRounds: prev.totalRounds + 1 }));
-      alert("Round added successfully!");
+      showSuccess('Round added', 'Round added successfully!');
       setShowAddRoundModal(false);
     } catch (error) {
-      alert("Failed to add round. Please try again.");
+      showError('Failed to add round', 'Failed to add round. Please try again.');
       console.error('Failed to add interview round:', error);
     }
   };

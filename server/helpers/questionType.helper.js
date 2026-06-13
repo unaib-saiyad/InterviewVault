@@ -2,7 +2,7 @@ import QuestionType from '../models/QuestionType.js';
 
 const QuestionTypeHelper = async (typeData) => {
     if(typeData.type === "existing") {
-        return typeData._id;
+        return typeData;
     }
     const normalizedName = typeData.name
         .trim()
@@ -10,14 +10,14 @@ const QuestionTypeHelper = async (typeData) => {
         .replace(/\s+/g, " ");
     const existingType = await QuestionType.findOne({ normalizedName });
     if (existingType) {
-        return existingType._id;
+        return existingType;
     }
     const newType = new QuestionType({
         name: typeData.name.trim(),
         normalizedName
     });
     await newType.save();
-    return newType._id;
+    return newType;
 };
 
 export default QuestionTypeHelper;

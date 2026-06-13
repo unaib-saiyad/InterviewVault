@@ -11,6 +11,7 @@ import { FormSuccess } from './FormSuccess';
 import api from '@/lib/api';
 import { ApiError } from '@/types/apiTypes';
 import { useRouter} from 'next/navigation';
+import { useToast } from '@/lib/useToast';
 
 type Props = {
     searchParams?: {
@@ -21,6 +22,7 @@ type Props = {
 };
 export default function LoginForm({searchParams}: Props) {
     const router = useRouter();
+    const { showSuccess, showError, showInfo, showWarning } = useToast();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -33,14 +35,17 @@ export default function LoginForm({searchParams}: Props) {
     useEffect(() => {
         if (searchParams?.registered) {
             setSuccess('A verification email has been sent to your inbox. Please verify your email before logging in.');
+            showInfo('Verify your email', 'A verification email has been sent to your inbox. Please verify your email before logging in.');
         }
         else if(searchParams?.sessionExpired){
             setError('Your session has expired. Please log in again.');
+            showWarning('Session expired', 'Your session has expired. Please log in again.');
         }
         else if(searchParams?.loggedOut){
             setSuccess('You have been logged out successfully.');
+            showInfo('Logged out', 'You have been logged out successfully.');
         }
-    }, [searchParams]);
+    }, [searchParams, showInfo, showWarning]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -56,11 +61,13 @@ export default function LoginForm({searchParams}: Props) {
         // Basic validation
         if (!formData.email || !formData.password) {
             setError('Please fill in all fields');
+            showWarning('Validation error', 'Please fill in all fields');
             return;
         }
 
         if (!formData.email.includes('@')) {
             setError('Please enter a valid email address');
+            showWarning('Validation error', 'Please enter a valid email address');
             return;
         }
 
@@ -73,22 +80,29 @@ export default function LoginForm({searchParams}: Props) {
             }
             localStorage.setItem('accessToken', res.data.accessToken);
             setSuccess('Login successful! Redirecting...');
+            showSuccess('Login successful', 'Welcome back! Redirecting to dashboard...');
             setTimeout(() => {
                 router.push("/dashboard");
             }, 2000);
         }
         catch(error){
             if(error instanceof Error){
-                setError('Login failed. Please check your credentials and try again.');
+                const msg = 'Login failed. Please check your credentials and try again.';
+                setError(msg);
+                showError('Login failed', msg);
             }
             else{
                 const err = error as ApiError
                 if(err.code==="EMAIL_NOT_VARIFIED"){
                     await handleResendEmail();
-                    setError('Your email is not verified. Please check your inbox for the verification email.');
+                    const msg = 'Your email is not verified. Please check your inbox for the verification email.';
+                    setError(msg);
+                    showWarning('Email not verified', msg);
                 }
                 else{
-                    setError(err.message|| 'Login failed. Please check your credentials and try again.');
+                    const msg = err.message|| 'Login failed. Please check your credentials and try again.';
+                    setError(msg);
+                    showError('Login failed', msg);
                 }
             }
         }
