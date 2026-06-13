@@ -17,7 +17,6 @@ import {
 import { cn } from '@/lib/utils';
 import { RoundResultBadge } from './StatusBadge';
 import { DifficultyBadge, RoundTypeBadge } from './DifficultyBadge';
-import type { Round } from './mockData';
 import type { InterviewRoundDetails } from '@/types/interviewTypes';
 type RoundCardProps = {
   round: InterviewRoundDetails;

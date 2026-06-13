@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { StatusBadge } from './StatusBadge';
 import { DifficultyBadge } from './DifficultyBadge';
-import type { Interview } from './mockData';
 import type { InterviewDetails } from '@/types/interviewTypes';
 type InterviewHeaderProps = {
   interview: InterviewDetails;

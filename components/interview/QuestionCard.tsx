@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DifficultyBadge, QuestionTypeBadge } from './DifficultyBadge';
-import type { RoundQuestion, FollowUpQuestion } from './mockData';
 import type { InterviewQuestionDetails } from '@/types/questionTypes';
 type QuestionCardProps = {
   question: InterviewQuestionDetails;

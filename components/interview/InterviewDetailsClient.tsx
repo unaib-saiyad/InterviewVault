@@ -9,7 +9,6 @@ import { RoundCard } from './RoundCard';
 import { QuestionCard } from './QuestionCard';
 import { AddQuestionModal } from './AddQuestionModal';
 import { AddRoundModal } from './AddRoundModal';
-import type { RoundQuestion, FollowUpQuestion } from './mockData';
 import type { QuestionFormData } from './AddQuestionModal';
 import type { RoundFormData } from './AddRoundModal';
 import api from '@/lib/api';
@@ -54,7 +53,6 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     const fetchInterview = async () => {
       try {
         const response = await api.get(`/interviews/${interviewId}`);
-        console.log('Fetched interview:', response.data.data);
         const {interview, interviewRounds, questionStats } = response.data.data;
         setInterview(interview);
         setQuestionStats(questionStats as QuestionStats);
@@ -71,7 +69,6 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     setSelectedRound(round);
     try{
       const response = await api.get(`/interviews/questions/round/${round._id}`);
-      console.log('Fetched questions for round:', response.data.data);
       setCurrentQuestions(response.data.data);
       setShowQuestions(true);
     }
@@ -165,6 +162,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     try {
       const response = await api.post(`/interviews/rounds/${interviewId}`, data);
       setInterviewRounds((prev) => [...prev, response.data.data]);
+      setQuestionStats((prev) => ({ ...prev, totalRounds: prev.totalRounds + 1 }));
       alert("Round added successfully!");
       setShowAddRoundModal(false);
     } catch (error) {
