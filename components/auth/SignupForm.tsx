@@ -10,10 +10,11 @@ import { FormError } from '@/components/auth/FormError';
 import { validatePassword } from '@/lib/validations';
 import api from '@/lib/api';
 import { ApiError } from '@/types/apiTypes';
-import { ins } from 'framer-motion/client';
+import { useToast } from '@/lib/useToast';
 
 export default function SignupForm() {
     const router = useRouter();
+    const { showSuccess, showError, showWarning } = useToast();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -34,22 +35,30 @@ export default function SignupForm() {
 
         // Basic validation
         if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
-            setError('Please fill in all fields');
+            const msg = 'Please fill in all fields';
+            setError(msg);
+            showWarning('Validation error', msg);
             return;
         }
 
         if (!formData.email.includes('@')) {
-            setError('Please enter a valid email address');
+            const msg = 'Please enter a valid email address';
+            setError(msg);
+            showWarning('Validation error', msg);
             return;
         }
 
         if (!validatePassword(formData.password)) {
-            setError('Password must be at least 8 characters long and include uppercase, lowercase, and a number');
+            const msg = 'Password must be at least 8 characters long and include uppercase, lowercase, and a number';
+            setError(msg);
+            showWarning('Weak password', msg);
             return;
         }
 
         if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
+            const msg = 'Passwords do not match';
+            setError(msg);
+            showWarning('Validation error', msg);
             return;
         }
 
@@ -61,15 +70,20 @@ export default function SignupForm() {
                 email: formData.email,
                 password: formData.password,
             });
+            showSuccess('Account created', 'Please check your email to verify your account before logging in.');
             router.push('/auth/login?registered=true');
         }
         catch(error: unknown){
             if(error instanceof Error){
-                setError('Registration failed. Please check your details and try again.');
+                const msg = 'Registration failed. Please check your details and try again.';
+                setError(msg);
+                showError('Registration failed', msg);
             }
             else{
                 const err = error as ApiError
-                setError(err.message|| 'Registration failed. Please check your details and try again.');
+                const msg = err.message|| 'Registration failed. Please check your details and try again.';
+                setError(msg);
+                showError('Registration failed', msg);
             }
         }
 

@@ -9,15 +9,16 @@ import { RoundCard } from './RoundCard';
 import { QuestionCard } from './QuestionCard';
 import { AddQuestionModal } from './AddQuestionModal';
 import { AddRoundModal } from './AddRoundModal';
-import type { RoundQuestion, FollowUpQuestion } from './mockData';
 import type { QuestionFormData } from './AddQuestionModal';
 import type { RoundFormData } from './AddRoundModal';
 import api from '@/lib/api';
 import { ApiError } from '@/types/apiTypes';
 import type { InterviewDetails, QuestionStats, InterviewRoundDetails } from '@/types/interviewTypes';
 import type { InterviewQuestionDetails } from '@/types/questionTypes';
+import { useToast } from '@/lib/useToast';
 
 export function InterviewDetailsClient( {interviewId}: { interviewId: string }) {
+  const { showSuccess, showError, showWarning, showInfo } = useToast();
   const [interview, setInterview] = useState<InterviewDetails>({
     id: '',
     company: {
@@ -54,13 +55,13 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     const fetchInterview = async () => {
       try {
         const response = await api.get(`/interviews/${interviewId}`);
-        console.log('Fetched interview:', response.data.data);
         const {interview, interviewRounds, questionStats } = response.data.data;
         setInterview(interview);
         setQuestionStats(questionStats as QuestionStats);
         setInterviewRounds(interviewRounds);
       } catch (error) {
         const apiError = error as ApiError;
+        showError('Failed to load interview', apiError.message);
         console.error('Failed to fetch interview:', apiError.message);
       }
     };
@@ -71,12 +72,11 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     setSelectedRound(round);
     try{
       const response = await api.get(`/interviews/questions/round/${round._id}`);
-      console.log('Fetched questions for round:', response.data.data);
       setCurrentQuestions(response.data.data);
       setShowQuestions(true);
     }
     catch(error){
-      alert("Failed to fetch questions for this round. Please try again.");
+      showError('Failed to fetch questions', 'Failed to fetch questions for this round. Please try again.');
       console.error('Failed to fetch questions for round:', error);
       setSelectedRound(null);
     }
@@ -151,11 +151,9 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
       }
     }
     catch(error){
-      alert("Failed to add question. Please try again.");
-      console.error('Failed to add question:', error);
+      showError('Failed to add question', 'Failed to add question. Please try again.');
     }
-
-    console.log('New question:', { ...data, parentQuestion: parentQuestionId, round: selectedRound?._id });
+    showSuccess('Question added', 'Question added successfully!');
     setShowAddQuestionModal(false);
     setParentQuestionId(null);
     setParentQuestionText(undefined);
@@ -165,10 +163,11 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     try {
       const response = await api.post(`/interviews/rounds/${interviewId}`, data);
       setInterviewRounds((prev) => [...prev, response.data.data]);
-      alert("Round added successfully!");
+      setQuestionStats((prev) => ({ ...prev, totalRounds: prev.totalRounds + 1 }));
+      showSuccess('Round added', 'Round added successfully!');
       setShowAddRoundModal(false);
     } catch (error) {
-      alert("Failed to add round. Please try again.");
+      showError('Failed to add round', 'Failed to add round. Please try again.');
       console.error('Failed to add interview round:', error);
     }
   };

@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion';
 import { BarChart3, Brain, CheckCircle2, Layers, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Round } from './mockData';
 import type { InterviewRoundDetails, QuestionStats } from '@/types/interviewTypes';
 
 type StatCardProps = {

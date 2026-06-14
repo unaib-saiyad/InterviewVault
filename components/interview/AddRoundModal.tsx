@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, use } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, RotateCcw } from 'lucide-react';
+import { form } from 'framer-motion/client';
 
 type AddRoundModalProps = {
   isOpen: boolean;
@@ -41,7 +42,7 @@ const difficultyLevels = [
 ];
 
 const getInitialFormData = (roundNumber: number): RoundFormData => ({
-  roundNumber,
+  roundNumber: roundNumber,
   roundType: 'technical',
   interviewDate: new Date().toISOString().split('T')[0],
   durationInMinutes: 60,
@@ -54,6 +55,10 @@ const getInitialFormData = (roundNumber: number): RoundFormData => ({
 export function AddRoundModal({ isOpen, onClose, onSubmit, roundNumber }: AddRoundModalProps) {
   const [formData, setFormData] = useState<RoundFormData>(getInitialFormData(roundNumber));
 
+  useEffect(() => {
+    setFormData(getInitialFormData(roundNumber));
+  }, [roundNumber]);
+  
   const handleChange = (field: keyof RoundFormData, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -91,7 +96,6 @@ export function AddRoundModal({ isOpen, onClose, onSubmit, roundNumber }: AddRou
       document.body.style.overflow = '';
     };
   }, [isOpen, handleKeyDown]);
-  console.log('Rendering AddRoundModal with roundNumber:', formData.roundNumber);
   return (
     <AnimatePresence>
       {isOpen && (

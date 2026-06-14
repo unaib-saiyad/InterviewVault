@@ -10,6 +10,7 @@ import { FormSuccess } from '@/components/auth/FormSuccess';
 import { FormError } from '@/components/auth/FormError';
 import { ApiError } from '@/types/apiTypes';
 import api from '@/lib/api';
+import { useToast } from '@/lib/useToast';
 
 export default function ForgotPasswordForm() {
     const [email, setEmail] = useState('');
@@ -17,6 +18,7 @@ export default function ForgotPasswordForm() {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const router = useRouter();
+    const { showSuccess, showError, showWarning } = useToast();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,11 +27,13 @@ export default function ForgotPasswordForm() {
         // Basic validation
         if (!email) {
             setError('Please enter your email address');
+            showWarning('Validation error', 'Please enter your email address');
             return;
         }
 
         if (!email.includes('@')) {
             setError('Please enter a valid email address');
+            showWarning('Validation error', 'Please enter a valid email address');
             return;
         }
 
@@ -38,14 +42,19 @@ export default function ForgotPasswordForm() {
         try{
             await api.post('/auth/forgot-password', { email });
             setSuccess(true);
+            showSuccess('Reset link sent', 'Check your email for the password reset link.');
         }
         catch(error){
             if(error instanceof Error){
-                setError("An error occurred while sending reset link. Please try again.");
+                const msg = "An error occurred while sending reset link. Please try again.";
+                setError(msg);
+                showError('Failed to send reset link', msg);
             }
             else{
                 const err = error as ApiError;
-                setError(err.message);
+                const msg = err.message;
+                setError(msg);
+                showError('Failed to send reset link', msg);
             }
         }
         finally{

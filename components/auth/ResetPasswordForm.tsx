@@ -8,17 +8,20 @@ import { FormError } from "./FormError";
 import { FormSuccess } from "./FormSuccess";
 import { ApiError } from "@/types/apiTypes";
 import api from "@/lib/api";
+import { useToast } from "@/lib/useToast";
 
 export default function ResetPasswordForm({ email, token }: { email: string | string[] | undefined, token: string | string[] | undefined }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const { showSuccess, showError, showWarning } = useToast();
 
   useEffect(() => {
     if (!email || !token) {
       setError("Invalid password reset link. Please request a new password reset email.");
+      showError('Invalid link', 'Invalid password reset link. Please request a new password reset email.');
     }
-  }, [email, token]);
+  }, [email, token, showError]);
 
   const [formData, setFormData] = useState({
     password: "",
@@ -33,16 +36,19 @@ export default function ResetPasswordForm({ email, token }: { email: string | st
 
     if (!formData.password || !formData.confirmPassword) {
       setError("Please fill in all fields");
+      showWarning('Validation error', 'Please fill in all fields');
       setLoading(false);
       return;
     }
     if (formData.password.length < 8) {
       setError("Password must be at least 8 characters");
+      showWarning('Weak password', 'Password must be at least 8 characters');
       setLoading(false);
       return;
     }
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
+      showWarning('Validation error', 'Passwords do not match');
       setLoading(false);
       return;
     }
@@ -53,18 +59,24 @@ export default function ResetPasswordForm({ email, token }: { email: string | st
         password: formData.password,
       });
       setSuccess("Your password has been reset successfully. You can now log in with your new password.");
+      showSuccess('Password reset', 'Your password has been reset successfully. You can now log in with your new password.');
     }
     catch (error) {
       if (error instanceof Error) {
-        setError("An error occurred while resetting password. Please try again.");
+        const msg = "An error occurred while resetting password. Please try again.";
+        setError(msg);
+        showError('Reset failed', msg);
       }
       else {
         const err = error as ApiError;
         if (err.code === 'VALIDATION_FAILED') {
-          setError("Password must be 8 letters long, must contain one small, one capital, a number and try again.");
+          const msg = "Password must be 8 letters long, must contain one small, one capital, a number and try again.";
+          setError(msg);
+          showWarning('Weak password', msg);
           return;
         }
         setError(err.message);
+        showError('Reset failed', err.message);
       }
     }
     finally {

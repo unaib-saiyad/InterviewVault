@@ -49,7 +49,7 @@ export const searchQuestionType = async (req, res) => {
 export const createQuestion = async (req, res) => {
     try {
         const { round, parentQuestion, question, type, difficulty, answer, notes, solved, confidenceScore } = req.body;
-        const questionTypeId = await QuestionTypeHelper(type);
+        const questionType = await QuestionTypeHelper(type);
 
         const depth = parentQuestion ? (await Question.findById(parentQuestion)).depth + 1 : 1;
         let sequence = "1";
@@ -72,7 +72,7 @@ export const createQuestion = async (req, res) => {
             round,
             parentQuestion: parentQuestion || null,
             question,
-            questionType: questionTypeId,
+            questionType: questionType._id,
             difficulty,
             answer,
             notes,
@@ -87,7 +87,7 @@ export const createQuestion = async (req, res) => {
         res.status(201).json({
             code: 'SUCCESS',
             message: 'Question created successfully',
-            data: newQuestion
+            data: { ...newQuestion._doc, questionType, followUps: [] }
         });
 
     } catch (error) {

@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { InterviewListSkeleton } from '../dashboard/skeletons';
 import api from '@/lib/api';
 import { ApiError } from '@/types/apiTypes';
+import { useToast } from '@/lib/useToast';
 
 type Company = {
   _id: string;
@@ -45,6 +46,7 @@ export function InterviewList() {
   const [loading, setLoading] = useState(false);
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const router = useRouter();
+  const { showError } = useToast();
   useEffect(() => {
     const fetchInterviews = async () => {
       debugger;
@@ -56,7 +58,7 @@ export function InterviewList() {
       } catch (error) {
         const apiError = error as ApiError;
         console.error('Failed to fetch interviews:', apiError.message);
-        alert('Failed to load interviews. Please try again later.');
+        showError('Failed to load interviews', 'Failed to load interviews. Please try again later.');
       } finally {
         setLoading(false);
       }
