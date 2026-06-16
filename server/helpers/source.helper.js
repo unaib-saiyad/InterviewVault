@@ -7,7 +7,7 @@ export const findOrCreateSource = async (sourceData) => {
     }
 
     if (sourceData.type === "existing") {
-        return sourceData._id;
+        return sourceData;
     }
 
     const normalizedName = sourceData.name
@@ -27,5 +27,5 @@ export const findOrCreateSource = async (sourceData) => {
         });
     }
 
-    return source._id;
+    return source;
 };

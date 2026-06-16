@@ -60,6 +60,7 @@ export type SourceOption =
 export type OverallRating = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
 export type InterviewData = {
+    _id?: string;
     company: CompanyOption | null;
     role: RoleOption | null;
     experienceLevel: ExperienceLevel;
@@ -81,7 +82,7 @@ export type InterviewData = {
 
   
   export type InterviewDetails = {
-    id: string;
+    _id: string;
     company: CompanyDetails;
     dateOfApplication: string;
     experienceLevel: string;
@@ -91,6 +92,7 @@ export type InterviewData = {
     role: {
       _id: string;
       title: string;
+      slug: string;
     } | null;
     source: {
       _id: string;
