@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InterviewListSkeleton } from '../dashboard/skeletons';
-import api from '@/lib/api';
 import { ApiError } from '@/types/apiTypes';
 import { useToast } from '@/lib/useToast';
+import { useQuery } from '@tanstack/react-query';
+import { fetchInterviews } from '@/lib/interviewApi';
 
 type Company = {
   _id: string;
@@ -43,29 +43,11 @@ const statusConfig = {
 };
 
 export function InterviewList() {
-  const [loading, setLoading] = useState(false);
-  const [interviews, setInterviews] = useState<Interview[]>([]);
   const router = useRouter();
-  const { showError } = useToast();
-  useEffect(() => {
-    const fetchInterviews = async () => {
-      debugger;
-      setLoading(true);
-      try {
-        const response = await api.get('/interviews');
-        setInterviews(response.data.data);
-        console.log('Fetched interviews:', response.data.data);
-      } catch (error) {
-        const apiError = error as ApiError;
-        console.error('Failed to fetch interviews:', apiError.message);
-        showError('Failed to load interviews', 'Failed to load interviews. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchInterviews();
-
-  }, []);
+  const { data, isLoading: loading, error } = useQuery<Interview[], ApiError>({
+    queryKey: ['interviews'],
+    queryFn: fetchInterviews,
+  });  
 
   const handleClick = (id: string) => {
     router.push(`/interviews/${id}`);
@@ -76,7 +58,7 @@ export function InterviewList() {
   }
   return (
     <div className='space-y-3'>
-      {interviews.map((interview) => (
+      {data?.map((interview) => (
         <div key={interview._id} onClick={() => handleClick(interview._id)} className="cursor-pointer flex items-start justify-between gap-4 rounded-2xl border border-gray-200 bg-white px-4 py-4 shadow-xs transition-all duration-200 hover:bg-gray-50">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1.5">

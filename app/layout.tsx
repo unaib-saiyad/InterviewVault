@@ -4,6 +4,7 @@ import "./globals.css";
 import { ToastProvider } from "@/lib/ToastContext";
 import { ToastRenderer } from "@/components/ui/ToastRenderer";
 import { GlobalToastHandler } from "@/components/ui/GlobalToastHandler";
+import QueryProvider from "@/providers/QueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,11 +35,13 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ToastProvider>
-          {children}
-          <ToastRenderer />
-          <GlobalToastHandler />
-        </ToastProvider>
+        <QueryProvider>
+          <ToastProvider>
+            {children}
+            <ToastRenderer />
+            <GlobalToastHandler />
+          </ToastProvider>
+        </QueryProvider>
       </body>
     </html>
   );
