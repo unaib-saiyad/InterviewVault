@@ -53,29 +53,6 @@ const revisionTasks = [
   { id: '3', title: 'Study design patterns', dueDate: 'Mar 15', status: 'completed' },
 ];
 
-const recentInterviews = [
-  {
-    id: '1',
-    company: 'Google',
-    role: 'Senior Frontend Engineer',
-    date: 'Mar 10, 2024',
-    status: 'selected' as const,
-  },
-  {
-    id: '2',
-    company: 'Meta',
-    role: 'Full Stack Developer',
-    date: 'Feb 28, 2024',
-    status: 'pending' as const,
-  },
-  {
-    id: '3',
-    company: 'Amazon',
-    role: 'Software Engineer',
-    date: 'Feb 15, 2024',
-    status: 'rejected' as const,
-  },
-];
 
 const chartData = [
   { topic: 'JavaScript', questions: 45 },
@@ -99,9 +76,6 @@ export default function DashboardPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleAddInterview = (data: any) => {
-    console.log('Adding interview:', data);
-  };
   return (
       <div className="space-y-10">
         {/* Header Section */}

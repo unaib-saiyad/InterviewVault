@@ -9,6 +9,8 @@ import RoleSelector from '../interview/RoleSelector';
 import SourceSelector from '../interview/SourceSelector';
 import api from '@/lib/api';
 import { useToast } from '@/lib/useToast';
+import { updateInterviewAPI } from '@/lib/interviewApi';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 type EditInterviewModalProps = {
   isOpen: boolean;
@@ -21,6 +23,22 @@ type EditInterviewModalProps = {
 
 export function EditInterviewModal({ isOpen, onClose, interview, updateInterview }: EditInterviewModalProps) {
   const { showSuccess, showError, showWarning } = useToast();
+  const queryClient = useQueryClient();
+  const updateMutation = useMutation({
+    mutationFn: (updatedData: InterviewData) => updateInterviewAPI(interview._id, updatedData),
+    onSuccess: (updatedInterview) => {
+      queryClient.invalidateQueries({ queryKey: ['interviews'] });
+      showSuccess('Interview updated', 'Interview updated successfully!');
+      updateInterview(updatedInterview);
+      onClose();
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || 'An error occurred while updating the interview.';
+      showError('Failed to update interview', errorMessage);
+    }
+  });
+
+
   const [formData, setFormData] = useState<InterviewData>({
     _id: interview._id,
     company: interview.company ? { type: 'existing', _id: interview.company._id, name: interview.company.name } : null,
@@ -53,32 +71,7 @@ export function EditInterviewModal({ isOpen, onClose, interview, updateInterview
       showWarning('Validation error', 'Company, Role, and Source are required fields.');
       return;
     }
-    try{
-      const response = await api.put(`/interviews/${formData._id}`, formData);
-      showSuccess('Interview updated', 'Interview updated successfully!');
-      setFormData({ company: null, role: null, experienceLevel: ExperienceLevel.Fresher, status: InterviewStatus.Applied, overallFeedback: '', overallRating: 0, source: null, dateOfApplication: new Date() });
-      updateInterview(response.data.data);      //   _id: formData._id!,
-      //   company: {
-      //     _id: formData.company._id,
-      //     name: formData.company.name,
-      //   },
-      //   role: {
-      //     _id: formData.role._id,
-      //     title: formData.role.title,
-      //     slug: formData.role.slug,
-      //   },
-      //   experienceLevel: formData.experienceLevel,
-      //   status: formData.status,
-      //   overallFeedback: formData.overallFeedback,
-      //   overallRating: formData.overallRating,
-      //   source: formData.source,
-      //   dateOfApplication: formData.dateOfApplication? formData.dateOfApplication.toISOString() : "",
-      // });
-      onClose();
-    } catch(error) {
-      console.error("Error updating interview:", error);
-      showError('Failed to update interview', 'Failed to update interview. Please try again.');
-    }
+    updateMutation.mutate(formData);
   };
 
   const handleClose = () => {

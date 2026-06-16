@@ -9,6 +9,8 @@ import RoleSelector from '../interview/RoleSelector';
 import SourceSelector from '../interview/SourceSelector';
 import api from '@/lib/api';
 import { useToast } from '@/lib/useToast';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createInterview } from '@/lib/interviewApi';
 
 type AddInterviewModalProps = {
   isOpen: boolean;
@@ -18,6 +20,14 @@ type AddInterviewModalProps = {
 
 
 export function AddInterviewModal({ isOpen, onClose }: AddInterviewModalProps) {
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: createInterview,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['interviews'] });
+    }
+  });
+
   const { showSuccess, showError, showWarning } = useToast();
   const [formData, setFormData] = useState<InterviewData>({
     company: null,
@@ -32,20 +42,20 @@ export function AddInterviewModal({ isOpen, onClose }: AddInterviewModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // onSubmit(formData);
-    if(!formData.company || !formData.role || !formData.source) {
+    if (!formData.company || !formData.role || !formData.source) {
       showWarning('Validation error', 'Company, Role, and Source are required fields.');
       return;
     }
-    try{
-      await api.post("/interviews", formData)
-      showSuccess('Interview created', 'Interview added successfully!');
-      setFormData({ company: null, role: null, experienceLevel: ExperienceLevel.Fresher, status: InterviewStatus.Applied, overallFeedback: '', overallRating: 0, source: null, dateOfApplication: new Date() });
-      onClose();
-    } catch(error) {
-      console.error("Error adding interview:", error);
-      showError('Failed to add interview', 'Failed to add interview. Please try again.');
-    }
+    mutation.mutate(formData, {
+      onError: (error: any) => {
+        showError('Error', error?.response?.data?.message || 'Failed to add interview. Please try again.');
+      },
+      onSuccess: () => {
+        showSuccess('Success', 'Interview added successfully.');
+        handleClose();
+      }
+    });
+
   };
 
   const handleClose = () => {
