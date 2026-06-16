@@ -1,17 +1,35 @@
 'use client';
 
-import { ArrowLeft, Building2, Calendar, Edit3, Globe, Star } from 'lucide-react';
+import { ArrowLeft, Building2, Calendar, Edit3, Globe, Star, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { StatusBadge } from './StatusBadge';
 import { DifficultyBadge } from './DifficultyBadge';
 import type { InterviewDetails } from '@/types/interviewTypes';
+import { useToast } from '@/lib/useToast';
+import api from '@/lib/api';
 type InterviewHeaderProps = {
   interview: InterviewDetails;
+  handleEdit: () => void;
 };
 
-export function InterviewHeader({ interview }: InterviewHeaderProps) {
+export function InterviewHeader({ interview, handleEdit }: InterviewHeaderProps) {
+  const {  showError, showSuccess } = useToast();
+  const router = useRouter();
+  const handleDelete = async () => {
+    if (confirm('Are you sure you want to delete this interview? This action cannot be undone.')) {
+      try {
+        await api.delete(`/interviews/${interview._id}`);
+        showSuccess('Interview deleted', 'The interview has been deleted successfully.');
+        router.push('/interviews');
+      } catch (error) {
+        showError('An error occurred while deleting the interview.');
+      }
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
@@ -76,7 +94,7 @@ export function InterviewHeader({ interview }: InterviewHeaderProps) {
           </div>
 
           {/* Right side - Rating and Actions */}
-          <div className="flex flex-row lg:flex-col items-center lg:items-end gap-4 lg:gap-3 shrink-0">
+          <div className="flex flex-col items-start lg:items-end gap-4 lg:gap-3 shrink-0">
             {/* Overall Rating */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -102,16 +120,26 @@ export function InterviewHeader({ interview }: InterviewHeaderProps) {
                 <span className="text-lg font-bold text-gray-900 ml-1">{interview.overallRating}/10</span>
               </div>
             </motion.div>
-
-            {/* Edit button */}
-            <motion.button
-              whileHover={{ scale: 1.02, boxShadow: '0 4px 12px -2px rgba(59, 130, 246, 0.2)' }}
-              whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-xs hover:border-brand-200 hover:text-brand-600 hover:shadow-sm transition-all duration-200"
-            >
-              <Edit3 className="h-4 w-4" />
-              Edit Interview
-            </motion.button>
+            <div className='flex gap-2'>
+              <motion.button
+                whileHover={{ scale: 1.02, boxShadow: '0 4px 12px -2px rgba(59, 130, 246, 0.2)' }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-xs hover:border-brand-200 hover:text-brand-600 hover:shadow-sm transition-all duration-200"
+                onClick={handleEdit}
+              >
+                <Edit3 className="h-4 w-4" />
+                Edit
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02, boxShadow: '0 4px 12px -2px rgba(59, 130, 246, 0.2)' }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-xs hover:border-red-200 hover:text-red-600 hover:shadow-sm transition-all duration-200"
+                onClick={handleDelete}
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </motion.button>
+            </div>
           </div>
         </div>
       </div>

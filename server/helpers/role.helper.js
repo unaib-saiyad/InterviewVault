@@ -5,7 +5,7 @@ import Role from "../models/Role.js";
 export const findOrCreateRole = async (roleData) => {
 
     if (roleData.type === "existing") {
-        return roleData._id;
+        return roleData;
     }
 
     const normalizedTitle = roleData.title
@@ -32,5 +32,5 @@ export const findOrCreateRole = async (roleData) => {
         });
     }
 
-    return role._id;
+    return role;
 };

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Filter, X, ArrowLeft, MessageSquare, ChevronDown } from 'lucide-react';
+import { Plus, Search, Filter, X, ArrowLeft, MessageSquare, ChevronDown, Edit } from 'lucide-react';
 import { InterviewHeader } from './InterviewHeader';
 import { InterviewStats, RoundTimeline } from './InterviewStats';
 import { RoundCard } from './RoundCard';
@@ -16,11 +16,12 @@ import { ApiError } from '@/types/apiTypes';
 import type { InterviewDetails, QuestionStats, InterviewRoundDetails } from '@/types/interviewTypes';
 import type { InterviewQuestionDetails } from '@/types/questionTypes';
 import { useToast } from '@/lib/useToast';
+import { EditInterviewModal } from './EditInterview';
 
 export function InterviewDetailsClient( {interviewId}: { interviewId: string }) {
   const { showSuccess, showError, showWarning, showInfo } = useToast();
   const [interview, setInterview] = useState<InterviewDetails>({
-    id: '',
+    _id: '',
     company: {
       _id: '',
       name: '',
@@ -50,6 +51,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [currentQuestions, setCurrentQuestions] = useState<InterviewQuestionDetails[]>([]);
+  const [showEditInterviewModal, setShowEditInterviewModal] = useState(false);
 
   useEffect(() => {
     const fetchInterview = async () => {
@@ -208,7 +210,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Interview Header */}
-      <InterviewHeader interview={interview} />
+      <InterviewHeader interview={interview} handleEdit={() => setShowEditInterviewModal(true)} />
       {/* Stats */}
       <InterviewStats statistics={questionStats} />
 
@@ -434,6 +436,13 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
         onClose={() => setShowAddRoundModal(false)}
         roundNumber={ questionStats.totalRounds + 1 }
         onSubmit={handleAddRoundSubmit}
+      />
+
+      <EditInterviewModal
+        isOpen={showEditInterviewModal}
+        onClose={() => setShowEditInterviewModal(false)}
+        interview={interview}
+        updateInterview={(updatedInterview) => setInterview(updatedInterview)}
       />
     </div>
   );

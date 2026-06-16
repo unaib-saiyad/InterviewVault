@@ -2,7 +2,7 @@ import Company from "../models/Company.js";
 
 export const findOrCreateCompany = async (companyData) => {
     if (companyData.type === "existing") {
-        return companyData._id;
+        return companyData;
     }
     const normalizedName = companyData.name
         .trim()
@@ -21,5 +21,5 @@ export const findOrCreateCompany = async (companyData) => {
         });
     }
 
-    return company._id;
+    return company;
 };
