@@ -14,3 +14,8 @@ export const createInterview = async (interviewData: any) => {
 export const deleteInterview = async (interviewId: string) => {
     await api.delete(`/interviews/${interviewId}`);
 }
+
+export const updateInterviewAPI = async (interviewId: string, interviewData: any) => {
+    const response = await api.put(`/interviews/${interviewId}`, interviewData);
+    return response.data.data;
+}
