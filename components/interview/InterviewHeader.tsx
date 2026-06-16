@@ -9,24 +9,33 @@ import { StatusBadge } from './StatusBadge';
 import { DifficultyBadge } from './DifficultyBadge';
 import type { InterviewDetails } from '@/types/interviewTypes';
 import { useToast } from '@/lib/useToast';
-import api from '@/lib/api';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { deleteInterview } from '@/lib/interviewApi';
 type InterviewHeaderProps = {
   interview: InterviewDetails;
   handleEdit: () => void;
 };
 
 export function InterviewHeader({ interview, handleEdit }: InterviewHeaderProps) {
-  const {  showError, showSuccess } = useToast();
+  const { showError, showSuccess } = useToast();
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteInterview(interview._id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['interviews'] });
+      showSuccess("Interview deleted successfully", 'Interview deleted successfully.');
+      router.push('/interviews');
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.response?.data?.message || 'An error occurred while deleting the interview.';
+      showError("Failed to delete interview" ,errorMessage);
+    }
+  });
+
   const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this interview? This action cannot be undone.')) {
-      try {
-        await api.delete(`/interviews/${interview._id}`);
-        showSuccess('Interview deleted', 'The interview has been deleted successfully.');
-        router.push('/interviews');
-      } catch (error) {
-        showError('An error occurred while deleting the interview.');
-      }
+      deleteMutation.mutate();
     }
   };
 

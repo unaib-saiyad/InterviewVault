@@ -10,3 +10,7 @@ export const createInterview = async (interviewData: any) => {
     const response = await api.post('/interviews', interviewData);
     return response.data.data;
 };
+
+export const deleteInterview = async (interviewId: string) => {
+    await api.delete(`/interviews/${interviewId}`);
+}
