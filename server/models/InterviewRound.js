@@ -47,7 +47,7 @@ const interviewRoundSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-interviewRoundSchema.index({ interview: 1, roundNumber: 1 });
+interviewRoundSchema.index({ interview: 1, roundNumber: 1 }, { unique: true });
 
 const InterviewRound = mongoose.model("InterviewRound", interviewRoundSchema);
 

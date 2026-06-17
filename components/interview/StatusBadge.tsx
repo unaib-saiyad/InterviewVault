@@ -35,9 +35,9 @@ export function StatusBadge({ status, size = 'sm' }: StatusBadgeProps) {
 
 const roundResultConfig: Record<string, { label: string; className: string }> = {
   cleared: { label: 'Cleared', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  failed: { label: 'Failed', className: 'bg-red-50 text-red-700 border-red-200' },
+  rejected: { label: 'Rejected', className: 'bg-red-50 text-red-700 border-red-200' },
   pending: { label: 'Pending', className: 'bg-amber-50 text-amber-700 border-amber-200' },
-  partial: { label: 'Partial', className: 'bg-orange-50 text-orange-700 border-orange-200' },
+  on_hold: { label: 'On Hold', className: 'bg-orange-50 text-orange-700 border-orange-200' },
 };
 
 export function RoundResultBadge({ result }: { result: string }) {

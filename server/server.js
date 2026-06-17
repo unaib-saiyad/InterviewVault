@@ -9,7 +9,7 @@ import companyRoutes from './routes.js/company.routes.js';
 import roleRoutes from './routes.js/role.routes.js';
 import sourceRoutes from './routes.js/source.routes.js';
 import interviewRoutes from './routes.js/interview.routes.js';
-import interviewRoundRoutes from './routes.js/interviewRound..routes.js';
+import interviewRoundRoutes from './routes.js/interviewRound.routes.js';
 import interviewQuestionRoutes from './routes.js/interviewQuestion.routes.js';
 
 dotenv.config();

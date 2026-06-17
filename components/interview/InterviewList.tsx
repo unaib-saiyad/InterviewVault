@@ -5,7 +5,6 @@ import { Calendar, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InterviewListSkeleton } from '../dashboard/skeletons';
 import { ApiError } from '@/types/apiTypes';
-import { useToast } from '@/lib/useToast';
 import { useQuery } from '@tanstack/react-query';
 import { fetchInterviews } from '@/lib/interviewApi';
 

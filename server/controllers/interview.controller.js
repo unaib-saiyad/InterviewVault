@@ -98,7 +98,7 @@ export const getInterviews = async (req, res) => {
             .populate("company", "name logo")
             .populate("role", "title slug")
             .populate("source", "name")
-            .sort({ createdAt: -1 });
+            .sort({ dateOfApplication: -1 });
         return res.status(200).json({
             code: "INTERVIEWS_FETCHED",
             message: "Interviews fetched successfully",
@@ -131,11 +131,10 @@ export const getInterviewById = async (req, res) => {
         const interviewRounds = await InterviewRound.find({ interview: interview._id }).sort({ roundNumber: 1 }).lean();
 
         const roundIds = interviewRounds.map(round => round._id);
-
         const [statsResult] = await Question.aggregate([
             {
                 $match: {
-                    interviewRound: { $in: roundIds }
+                    round: { $in: roundIds }
                 }
             },
             {
@@ -167,7 +166,6 @@ export const getInterviewById = async (req, res) => {
                 }
             }
         ]);
-
         const difficultyPriority = { "easy": 1, "medium": 2, "hard": 3 };
 
         let difficulty = "easy";

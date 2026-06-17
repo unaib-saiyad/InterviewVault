@@ -7,7 +7,6 @@ import { ExperienceLevel, InterviewStatus, InterviewDetails, OverallRating, Inte
 import CompanySelector from '../interview/CompanySelector';
 import RoleSelector from '../interview/RoleSelector';
 import SourceSelector from '../interview/SourceSelector';
-import api from '@/lib/api';
 import { useToast } from '@/lib/useToast';
 import { updateInterviewAPI } from '@/lib/interviewApi';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -16,20 +15,19 @@ type EditInterviewModalProps = {
   isOpen: boolean;
   onClose: () => void;
   interview: InterviewDetails;
-  updateInterview: (updatedInterview: InterviewDetails) => void;
 };
 
 
 
-export function EditInterviewModal({ isOpen, onClose, interview, updateInterview }: EditInterviewModalProps) {
+export function EditInterviewModal({ isOpen, onClose, interview }: EditInterviewModalProps) {
   const { showSuccess, showError, showWarning } = useToast();
   const queryClient = useQueryClient();
   const updateMutation = useMutation({
     mutationFn: (updatedData: InterviewData) => updateInterviewAPI(interview._id, updatedData),
     onSuccess: (updatedInterview) => {
       queryClient.invalidateQueries({ queryKey: ['interviews'] });
+      queryClient.invalidateQueries({ queryKey: ['interviewRound', updatedInterview._id] });
       showSuccess('Interview updated', 'Interview updated successfully!');
-      updateInterview(updatedInterview);
       onClose();
     },
     onError: (error: any) => {
