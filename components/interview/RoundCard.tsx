@@ -13,6 +13,7 @@ import {
   Edit3,
   FileText,
   Calendar,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { RoundResultBadge } from './StatusBadge';
@@ -23,9 +24,10 @@ type RoundCardProps = {
   onViewQuestions: (round: InterviewRoundDetails) => void;
   onAddQuestion: (round: InterviewRoundDetails) => void;
   onEditRound: (round: InterviewRoundDetails) => void;
+  onDeleteRound: (roundId: string) => void;
 };
 
-export function RoundCard({ round, onViewQuestions, onAddQuestion, onEditRound }: RoundCardProps) {
+export function RoundCard({ round, onViewQuestions, onAddQuestion, onEditRound, onDeleteRound }: RoundCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -144,6 +146,15 @@ export function RoundCard({ round, onViewQuestions, onAddQuestion, onEditRound }
                 >
                   <Edit3 className="h-3.5 w-3.5" />
                   Edit Round
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => onDeleteRound(round._id)}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-xs font-semibold text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete Round
                 </motion.button>
               </div>
             </div>

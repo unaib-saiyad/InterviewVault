@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Search, Filter, X, ArrowLeft, MessageSquare, ChevronDown, Edit } from 'lucide-react';
 import { InterviewHeader } from './InterviewHeader';
@@ -11,17 +11,31 @@ import { AddQuestionModal } from './AddQuestionModal';
 import { AddRoundModal } from './AddRoundModal';
 import type { QuestionFormData } from './AddQuestionModal';
 import type { RoundFormData } from './AddRoundModal';
+import type { EditRoundFormData } from './EditRoundModal';
 import api from '@/lib/api';
 import { ApiError } from '@/types/apiTypes';
 import type { InterviewDetails, QuestionStats, InterviewRoundDetails } from '@/types/interviewTypes';
 import type { InterviewQuestionDetails } from '@/types/questionTypes';
 import { useToast } from '@/lib/useToast';
 import { EditInterviewModal } from './EditInterview';
+import { EditRoundModal } from './EditRoundModal';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchInterviewRounds, createInterviewRound, updateInterviewRound, deleteInterviewRound } from '@/lib/interviewRoundApi';
 
 export function InterviewDetailsClient( {interviewId}: { interviewId: string }) {
-  const { showSuccess, showError, showWarning, showInfo } = useToast();
-  const [interview, setInterview] = useState<InterviewDetails>({
-    _id: '',
+  const queryClient = useQueryClient();
+  const { data, isLoading, error } = useQuery<{
+    interview: InterviewDetails;
+    interviewRounds: InterviewRoundDetails[];
+    questionStats: QuestionStats;
+  }, ApiError>({
+    queryKey: ['interviewRound', interviewId],
+    queryFn: () => fetchInterviewRounds(interviewId),
+  });
+
+  const {interview, interviewRounds, questionStats} = useMemo(() => data || {
+    interview: {
+      _id: '',
     company: {
       _id: '',
       name: '',
@@ -33,15 +47,19 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     overallRating: 0,
     role: null,
     source: null,
-  });
-  const [questionStats, setQuestionStats] = useState<QuestionStats>({
-    difficulty: 'easy',
-    rootQuestions: 0,
-    solvedQuestions: 0,
-    totalQuestions: 0,
-    totalRounds: 0,
-  });
-  const [interviewRounds, setInterviewRounds] = useState<InterviewRoundDetails[]>([]);
+    },
+    interviewRounds: [],
+    questionStats: {
+      difficulty: 'easy',
+      rootQuestions: 0,
+      solvedQuestions: 0,
+      totalQuestions: 0,
+      totalRounds: 0,
+    },
+  }, [data]);
+
+  const { showSuccess, showError, showWarning, showInfo } = useToast();
+
   const [selectedRound, setSelectedRound] = useState<InterviewRoundDetails | null>(null);
   const [showQuestions, setShowQuestions] = useState(false);
   const [showAddQuestionModal, setShowAddQuestionModal] = useState(false);
@@ -52,23 +70,34 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
   const [filterType, setFilterType] = useState<string>('all');
   const [currentQuestions, setCurrentQuestions] = useState<InterviewQuestionDetails[]>([]);
   const [showEditInterviewModal, setShowEditInterviewModal] = useState(false);
+  const [showEditRoundModal, setShowEditRoundModal] = useState(false);
+  const [roundToEdit, setRoundToEdit] = useState<InterviewRoundDetails | null>(null);
+  const addRoundMutation = useMutation({
+    mutationFn: (data: RoundFormData) => createInterviewRound(interviewId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['interviewRound', interviewId] });
+      setShowAddRoundModal(false);
+      showSuccess('Round added', 'Interview round added successfully!');
+    }
+  });
 
-  useEffect(() => {
-    const fetchInterview = async () => {
-      try {
-        const response = await api.get(`/interviews/${interviewId}`);
-        const {interview, interviewRounds, questionStats } = response.data.data;
-        setInterview(interview);
-        setQuestionStats(questionStats as QuestionStats);
-        setInterviewRounds(interviewRounds);
-      } catch (error) {
-        const apiError = error as ApiError;
-        showError('Failed to load interview', apiError.message);
-        console.error('Failed to fetch interview:', apiError.message);
-      }
-    };
-    fetchInterview();
-  }, [interviewId]);
+  const editRoundMutation = useMutation({
+    mutationFn: ({ roundId, data }: { roundId: string, data: EditRoundFormData }) => updateInterviewRound(roundId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['interviewRound', interviewId] });
+      setShowEditRoundModal(false);
+      setRoundToEdit(null);
+      showSuccess('Round updated', 'Interview round updated successfully!');
+    }
+  });
+
+  const deleteRoundMutation = useMutation({
+    mutationFn: (roundId: string) => deleteInterviewRound(roundId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['interviewRound', interviewId] });
+      showSuccess('Round deleted', 'Interview round deleted successfully!');
+    }
+  });
 
   const handleViewQuestions = async (round: InterviewRoundDetails) => {
     setSelectedRound(round);
@@ -162,16 +191,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
   };
 
   const handleAddRoundSubmit = async (data: RoundFormData) => {
-    try {
-      const response = await api.post(`/interviews/rounds/${interviewId}`, data);
-      setInterviewRounds((prev) => [...prev, response.data.data]);
-      setQuestionStats((prev) => ({ ...prev, totalRounds: prev.totalRounds + 1 }));
-      showSuccess('Round added', 'Round added successfully!');
-      setShowAddRoundModal(false);
-    } catch (error) {
-      showError('Failed to add round', 'Failed to add round. Please try again.');
-      console.error('Failed to add interview round:', error);
-    }
+    addRoundMutation.mutate(data);
   };
 
   const handleEditQuestion = (question: any) => {
@@ -179,7 +199,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
   };
 
   const handleDeleteQuestion = (questionId: string) => {
-    console.log('Delete question:', questionId);
+    console.log('Delete question Id:', questionId);
   };
 
   const handleToggleSolved = (questionId: string) => {
@@ -196,8 +216,19 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
   };
 
   const handleEditRound = (round: InterviewRoundDetails) => {
-    console.log('Edit round:', round);
+    setShowEditRoundModal(true);
+    setRoundToEdit(round);
   };
+
+  const handleEditRoundSubmit = (data: EditRoundFormData) => {
+    editRoundMutation.mutate({ roundId: data._id, data });
+  }
+
+  const handleDeleteRound = (roundId: string) => {
+    if (confirm('Are you sure you want to delete this question? This action cannot be undone.')) {
+      deleteRoundMutation.mutate(roundId);
+    }
+  }
 
   const filteredQuestions = currentQuestions.filter((q) => {
     const matchesSearch = q.question.toLowerCase().includes(searchQuery.toLowerCase());
@@ -411,6 +442,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
                     onViewQuestions={handleViewQuestions}
                     onAddQuestion={handleAddQuestionClick}
                     onEditRound={handleEditRound}
+                    onDeleteRound={handleDeleteRound}
                   />
                 ))}
               </div>
@@ -442,7 +474,24 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
         isOpen={showEditInterviewModal}
         onClose={() => setShowEditInterviewModal(false)}
         interview={interview}
-        updateInterview={(updatedInterview) => setInterview(updatedInterview)}
+      />
+
+      <EditRoundModal
+        isOpen={showEditRoundModal}
+        onClose={() => setShowEditRoundModal(false)}
+        roundData={roundToEdit || {
+          _id: '',
+          roundNumber: 1,
+          roundType: 'technical',
+          interviewDate: new Date().toISOString().split('T')[0],
+          durationInMinutes: 60,
+          difficulty: 'medium',
+          interviewerName:  '',
+          feedback: '',
+          result: 'pending',
+        }}
+        maxRoundNumber={questionStats.totalRounds}
+        onSubmit={handleEditRoundSubmit}
       />
     </div>
   );
