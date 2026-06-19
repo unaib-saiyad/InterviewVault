@@ -100,6 +100,7 @@ export const createQuestion = async (req, res) => {
 
 export const getQuestionsByRound = async (req, res) => {
     const { round } = req.params;
+    console.log("round", round);
     try {
         const questions = await Question.find({ round }).populate('questionType', 'name description').sort({ sequence: 1 });
         const questionMap = {};

@@ -6,12 +6,17 @@ import { X, Save, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import QuestionTypeSelector from './QuestionTypeSelector';
 import type { QuestionTypeOption } from '@/types/questionTypes';
+import { createQuestion } from '@/lib/questionApi';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/lib/useToast';
 
 type AddQuestionModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: QuestionFormData) => void;
   parentQuestionText?: string;
+  parentQuestionId: string;
+  selectedRoundId: string;
 };
 
 export type QuestionFormData = {
@@ -39,7 +44,17 @@ const difficultyLevels = [
   { value: 'hard', label: 'Hard' },
 ];
 
-export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionText }: AddQuestionModalProps) {
+export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionId, parentQuestionText, selectedRoundId }: AddQuestionModalProps) {
+  const { showSuccess } = useToast();
+  const queryClient = useQueryClient();
+  const createQuestionMutation = useMutation({
+    mutationFn: ({ formData, parentQuestionId, selectedRoundId }: { formData: any; parentQuestionId: string; selectedRoundId: string }) => createQuestion({ data: formData, parentQuestionId, selectedRoundId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['interviewQuestions', selectedRoundId] });
+      onClose();
+    }
+  });
+
   const [formData, setFormData] = useState<QuestionFormData>({
     question: '',
     type: null,
@@ -54,9 +69,11 @@ export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionText
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.question.trim()) return;
+    await createQuestionMutation.mutateAsync({ formData, parentQuestionId, selectedRoundId });
+    showSuccess('Question added', 'Question added successfully!');
     onSubmit(formData);
     setFormData({
       question: '',
@@ -87,6 +104,7 @@ export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionText
       document.body.style.overflow = '';
     };
   }, [isOpen, handleKeyDown]);
+
 
   return (
     <AnimatePresence>
@@ -119,7 +137,7 @@ export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionText
                   </h2>
                   {parentQuestionText && (
                     <p className="text-sm text-gray-500 mt-0.5 truncate max-w-sm">
-                      to: &ldquo;{parentQuestionText.slice(0, 60)}...&rdquo;
+                      to: &ldquo;{parentQuestionText.slice(0, 60)} {parentQuestionText.length > 60 ? '...' : ''}&rdquo;
                     </p>
                   )}
                 </div>

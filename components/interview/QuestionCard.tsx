@@ -20,7 +20,7 @@ import type { InterviewQuestionDetails } from '@/types/questionTypes';
 type QuestionCardProps = {
   question: InterviewQuestionDetails;
   isFollowUp?: boolean;
-  onAddFollowUp: (parentId: string) => void;
+  onAddFollowUp: (parentId: string, text: string) => void;
   onEdit: (question: any) => void;
   onDelete: (questionId: string) => void;
   onToggleSolved: (questionId: string) => void;
@@ -88,7 +88,7 @@ export function QuestionCard({
             {/* Action buttons */}
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <button
-                onClick={() => onAddFollowUp(question._id)}
+                onClick={() => onAddFollowUp(question._id, question.question)}
                 className="p-1.5 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-all duration-200"
                 title="Add Follow-up Question"
               >
