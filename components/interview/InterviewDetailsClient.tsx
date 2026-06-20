@@ -22,8 +22,9 @@ import { EditRoundModal } from './EditRoundModal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchInterviewRounds, createInterviewRound, updateInterviewRound, deleteInterviewRound } from '@/lib/interviewRoundApi';
 import { fetchQuestions } from '@/lib/questionApi';
+import { EditQuestionModal } from './EditQuestionModal';
 
-export function InterviewDetailsClient( {interviewId}: { interviewId: string }) {
+export function InterviewDetailsClient({ interviewId }: { interviewId: string }) {
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useQuery<{
     interview: InterviewDetails;
@@ -34,20 +35,20 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     queryFn: () => fetchInterviewRounds(interviewId),
   });
 
-  const {interview, interviewRounds, questionStats} = useMemo(() => data || {
+  const { interview, interviewRounds, questionStats } = useMemo(() => data || {
     interview: {
       _id: '',
-    company: {
-      _id: '',
-      name: '',
-    },
-    dateOfApplication: '',
-    experienceLevel: '',
-    status: '',
-    overallFeedback: '',
-    overallRating: 0,
-    role: null,
-    source: null,
+      company: {
+        _id: '',
+        name: '',
+      },
+      dateOfApplication: '',
+      experienceLevel: '',
+      status: '',
+      overallFeedback: '',
+      overallRating: 0,
+      role: null,
+      source: null,
     },
     interviewRounds: [],
     questionStats: {
@@ -64,6 +65,25 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
   const [selectedRound, setSelectedRound] = useState<InterviewRoundDetails | null>(null);
   const [showQuestions, setShowQuestions] = useState(false);
   const [showAddQuestionModal, setShowAddQuestionModal] = useState(false);
+  const [showEditQuestionModal, setShowEditQuestionModal] = useState(false);
+  const [selectedQuestion4Edit, setSelectedQuestion4Edit] = useState<InterviewQuestionDetails>({
+    _id: '',
+    question: '',
+    questionType: {
+      _id: '',
+      name: ''
+    },
+    difficulty: 'medium',
+    answer: '',
+    notes: '',
+    solved: false,
+    confidenceScore: 3,
+    depth: 1,
+    parentQuestion: null,
+    round: '',
+    sequence: '',
+    followUps: []
+  });
   const [showAddRoundModal, setShowAddRoundModal] = useState(false);
   const [parentQuestionId, setParentQuestionId] = useState<string | null>(null);
   const [parentQuestionText, setParentQuestionText] = useState<string | undefined>(undefined);
@@ -98,7 +118,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
       showSuccess('Round deleted', 'Interview round deleted successfully!');
     }
   });
-  
+
   const { data: currentQuestions = [], isLoading: isQuestionLoading, error: isQuestionError } = useQuery<InterviewQuestionDetails[], ApiError>({
     queryKey: ['interviewQuestions', selectedRound?._id || ""],
     queryFn: () => fetchQuestions(selectedRound?._id),
@@ -110,7 +130,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     setShowQuestions(true);
   };
 
-  const handleBackToRounds = () => { 
+  const handleBackToRounds = () => {
     setShowQuestions(false);
     setSelectedRound(null);
   };
@@ -138,9 +158,32 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     addRoundMutation.mutate(data);
   };
 
-  const handleEditQuestion = (question: any) => {
-    console.log('Edit question:', question);
+  const handleEditQuestion = (question: InterviewQuestionDetails) => {
+    setSelectedQuestion4Edit(question);
+    setShowEditQuestionModal(true);
   };
+
+  const handleEditClose = () => {
+    setShowEditQuestionModal(false);
+    setSelectedQuestion4Edit({
+      _id: '',
+      question: '',
+      questionType: {
+        _id: '',
+        name: ''
+      },
+      difficulty: 'medium',
+      answer: '',
+      notes: '',
+      solved: false,
+      confidenceScore: 3,
+      depth: 1,
+      parentQuestion: null,
+      round: '',
+      sequence: '',
+      followUps: []
+    })
+  }
 
   const handleToggleSolved = (questionId: string) => {
     const toggleInTree = (questions: InterviewQuestionDetails[]): InterviewQuestionDetails[] => {
@@ -391,7 +434,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
         )}
       </AnimatePresence>
 
-      {/* Modals */} 
+      {/* Modals */}
       <AddQuestionModal
         isOpen={showAddQuestionModal}
         onClose={() => {
@@ -405,10 +448,18 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
         selectedRoundId={selectedRound?._id || ""}
       />
 
+      <EditQuestionModal
+        isOpen={showEditQuestionModal}
+        onClose={handleEditClose}
+        questionObj={selectedQuestion4Edit}
+        onSubmit={(data) => { showSuccess("Question Updated", "Question Updated Successfully"); handleEditClose(); }}
+        selectedRoundId={selectedRound?._id || ""}
+      />
+
       <AddRoundModal
         isOpen={showAddRoundModal}
         onClose={() => setShowAddRoundModal(false)}
-        roundNumber={ questionStats.totalRounds + 1 }
+        roundNumber={questionStats.totalRounds + 1}
         onSubmit={handleAddRoundSubmit}
       />
 
@@ -428,7 +479,7 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
           interviewDate: new Date().toISOString().split('T')[0],
           durationInMinutes: 60,
           difficulty: 'medium',
-          interviewerName:  '',
+          interviewerName: '',
           feedback: '',
           result: 'pending',
         }}

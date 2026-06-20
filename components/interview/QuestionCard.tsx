@@ -26,7 +26,7 @@ type QuestionCardProps = {
   isFollowUp?: boolean;
   roundId: string;
   onAddFollowUp: (parentId: string, text: string) => void;
-  onEdit: (question: any) => void;
+  onEdit: (question: InterviewQuestionDetails) => void;
   onToggleSolved: (questionId: string) => void;
 };
 
@@ -57,7 +57,7 @@ export function QuestionCard({
 
   const handleDelete = async(questionId: string)=>{
     if (confirm('Are you sure you want to delete this question? This action cannot be undone.')) {
-      deleteQuestionMutation.mutate(question._id);
+      deleteQuestionMutation.mutate(questionId);
     }
   }
 

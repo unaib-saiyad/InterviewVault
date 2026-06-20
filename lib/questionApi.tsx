@@ -17,3 +17,7 @@ export const fetchQuestions = async (roundId: string | undefined) => {
 export const deleteQuestion = async (questionId: string) => {
   await api.delete(`/interviews/questions/${questionId}`);
 }
+
+export const updateQuestion = async ({questionId, data}: {questionId: string, data: any}) => {
+  await api.put(`/interviews/questions/${questionId}`, data);
+}

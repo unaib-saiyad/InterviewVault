@@ -13,7 +13,7 @@ export type QuestionTypeOption =
 export type InterviewQuestionDetails = {
   _id: string;
   answer: string;
-  confidenceLevel: number;
+  confidenceScore: number;
   depth: number;
   difficulty: string;
   notes: string;

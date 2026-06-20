@@ -171,6 +171,50 @@ export const deleteQuestion = async (req, res) => {
             message: "Failed to delete question",
         });
     }
+}
 
-
+export const updateQuestion = async (req, res)=>{
+    const questionId = req.params.id;
+    const { question, type, difficulty, answer, notes, solved, confidenceScore } = req.body;
+    try{
+        const questionObj = await Question.findById(questionId);
+        if(!questionObj){
+            return res.status(404).json({
+                code: "INVALID_QUESTION",
+                message: "Invalid Question, please try again"
+            });
+        }
+        const questionType = await QuestionTypeHelper(type);
+        if(question){
+            questionObj.question = question;
+        }
+        if(questionType){
+            questionObj.questionType = questionType._id;
+        }
+        if(difficulty){
+            questionObj.difficulty = difficulty;
+        }
+        if(answer){
+            questionObj.answer = answer;
+        }
+        if(notes){
+            questionObj.notes = notes;
+        }
+        questionObj.solved = solved;
+        if(confidenceScore){
+            questionObj.confidenceScore = confidenceScore;
+        }
+        await questionObj.save();
+        return res.status(200).json({
+            code: "QUESTION_UPDATED",
+            message: "Question updated successfully...",
+            data: questionObj
+        })
+    }
+    catch(err){
+        return res.status(500).json({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to update question",
+        });
+    }
 }
