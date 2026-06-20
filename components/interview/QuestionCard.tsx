@@ -17,29 +17,49 @@ import {
 import { cn } from '@/lib/utils';
 import { DifficultyBadge, QuestionTypeBadge } from './DifficultyBadge';
 import type { InterviewQuestionDetails } from '@/types/questionTypes';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { deleteQuestion } from '@/lib/questionApi';
+import { useToast } from '@/lib/useToast';
+
 type QuestionCardProps = {
   question: InterviewQuestionDetails;
   isFollowUp?: boolean;
+  roundId: string;
   onAddFollowUp: (parentId: string, text: string) => void;
   onEdit: (question: any) => void;
-  onDelete: (questionId: string) => void;
   onToggleSolved: (questionId: string) => void;
 };
 
 export function QuestionCard({
   question,
   isFollowUp = false,
+  roundId,
   onAddFollowUp,
   onEdit,
-  onDelete,
   onToggleSolved,
 }: QuestionCardProps) {
+  const queryClient = useQueryClient();
+  const { showSuccess } = useToast();
+  const deleteQuestionMutation = useMutation({
+    mutationFn: (questionId: string)=> deleteQuestion(questionId),
+    onSuccess: () =>{
+      queryClient.invalidateQueries({ queryKey: [ 'interviewQuestions', roundId ] });
+      showSuccess("Question Deleted", "Question deleted successfully...");
+    }
+
+  })
   const [showChildren, setShowChildren] = useState(true);
   const [showAnswer, setShowAnswer] = useState(false);
 
   const hasChildren = question.followUps.length > 0
 
   const children = question.followUps;
+
+  const handleDelete = async(questionId: string)=>{
+    if (confirm('Are you sure you want to delete this question? This action cannot be undone.')) {
+      deleteQuestionMutation.mutate(question._id);
+    }
+  }
 
   return (
     <motion.div
@@ -102,7 +122,7 @@ export function QuestionCard({
                 <Edit3 className="h-3.5 w-3.5" />
               </button>
               <button
-                onClick={() => onDelete(question._id)}
+                onClick={() => handleDelete(question._id)}
                 className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
                 title="Delete"
               >
@@ -206,10 +226,10 @@ export function QuestionCard({
                 <QuestionCard
                   key={child._id}
                   question={child}
+                  roundId={roundId}
                   isFollowUp
                   onAddFollowUp={onAddFollowUp}
                   onEdit={onEdit}
-                  onDelete={onDelete}
                   onToggleSolved={onToggleSolved}
                 />
               ))}

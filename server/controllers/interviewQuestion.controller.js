@@ -1,6 +1,7 @@
 import QuestionType from '../models/QuestionType.js';
 import Question from '../models/Question.js';
 import QuestionTypeHelper from '../helpers/questionType.helper.js';
+import mongoose from 'mongoose';
 
 export const createQuestionType = async (req, res) => {
     try {
@@ -53,9 +54,9 @@ export const createQuestion = async (req, res) => {
 
         const depth = parentQuestion ? (await Question.findById(parentQuestion)).depth + 1 : 1;
         let sequence = "1";
-        if(parentQuestion){
+        if (parentQuestion) {
             const parent = await Question.findById(parentQuestion);
-            if(!parent) {
+            if (!parent) {
                 return res.status(404).json({
                     code: 'ERROR',
                     message: 'Parent question not found'
@@ -64,7 +65,7 @@ export const createQuestion = async (req, res) => {
             const siblingCount = await Question.countDocuments({ round, parentQuestion });
             sequence = `${parent.sequence.split('.')[0]}.${siblingCount + 1}`;
         }
-        else{
+        else {
             sequence = (await Question.countDocuments({ round })) + 1;
         }
 
@@ -100,7 +101,6 @@ export const createQuestion = async (req, res) => {
 
 export const getQuestionsByRound = async (req, res) => {
     const { round } = req.params;
-    console.log("round", round);
     try {
         const questions = await Question.find({ round }).populate('questionType', 'name description').sort({ sequence: 1 });
         const questionMap = {};
@@ -129,4 +129,48 @@ export const getQuestionsByRound = async (req, res) => {
             message: error.message
         });
     }
+}
+
+const deleteQuestionTree = async (questionId, session) => {
+    const children = await Question.find({
+        parentQuestion: questionId,
+    })
+        .select("_id")
+        .session(session)
+        .lean();
+    for (const child of children) {
+        await deleteQuestionTree(child._id, session);
+    }
+
+    await Question.findByIdAndDelete(questionId)
+      .session(session);
+};
+
+export const deleteQuestion = async (req, res) => {
+    const session = await mongoose.startSession()
+    try {
+        session.startTransaction();
+        const questionId = req.params.id;
+        await deleteQuestionTree(questionId, session);
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return res.status(200).json({
+            code: "QUESTION_DELETED",
+            message: "Question deleted successfully",
+        });
+    }
+
+    catch (err) {
+        await session.abortTransaction();
+        session.endSession();
+
+        return res.status(500).json({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to delete question",
+        });
+    }
+
+
 }

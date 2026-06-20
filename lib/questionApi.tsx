@@ -13,3 +13,7 @@ export const fetchQuestions = async (roundId: string | undefined) => {
   const response = await api.get(`/interviews/questions/round/${roundId}`);
   return response.data.data;
 }
+
+export const deleteQuestion = async (questionId: string) => {
+  await api.delete(`/interviews/questions/${questionId}`);
+}

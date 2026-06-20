@@ -142,10 +142,6 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
     console.log('Edit question:', question);
   };
 
-  const handleDeleteQuestion = (questionId: string) => {
-    console.log('Delete question Id:', questionId);
-  };
-
   const handleToggleSolved = (questionId: string) => {
     const toggleInTree = (questions: InterviewQuestionDetails[]): InterviewQuestionDetails[] => {
       return questions.map((q) => {
@@ -324,9 +320,9 @@ export function InterviewDetailsClient( {interviewId}: { interviewId: string }) 
                     <QuestionCard
                       key={question._id}
                       question={question}
+                      roundId={selectedRound._id}
                       onAddFollowUp={handleAddFollowUpQuestion}
                       onEdit={handleEditQuestion}
-                      onDelete={handleDeleteQuestion}
                       onToggleSolved={handleToggleSolved}
                     />
                   ))}
