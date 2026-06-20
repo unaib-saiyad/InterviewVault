@@ -6,37 +6,27 @@ import { X, Save, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import QuestionTypeSelector from './QuestionTypeSelector';
 import type { QuestionTypeOption } from '@/types/questionTypes';
-import { createQuestion } from '@/lib/questionApi';
+import { updateQuestion } from '@/lib/questionApi';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/lib/useToast';
-
-type AddQuestionModalProps = {
+import type { InterviewQuestionDetails } from '@/types/questionTypes';
+type EditQuestionModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: QuestionFormData) => void;
-  parentQuestionText?: string;
-  parentQuestionId: string;
+  questionObj: InterviewQuestionDetails;
+  onSubmit: (data: EditQuestionFormData) => void;
   selectedRoundId: string;
 };
 
-export type QuestionFormData = {
+export type EditQuestionFormData = {
+  _id: string;
   question: string;
   type: QuestionTypeOption | null;
   difficulty: string;
   answer: string;
   notes: string;
   solved: boolean;
-  confidenceScore?: 1 | 2 | 3 | 4 | 5;
+  confidenceScore: Number;
 };
-
-const questionTypes = [
-  { value: 'technical', label: 'Technical' },
-  { value: 'behavioral', label: 'Behavioral' },
-  { value: 'system_design', label: 'System Design' },
-  { value: 'coding', label: 'Coding' },
-  { value: 'dsa', label: 'DSA' },
-  { value: 'hr', label: 'HR' },
-];
 
 const difficultyLevels = [
   { value: 'easy', label: 'Easy' },
@@ -44,38 +34,49 @@ const difficultyLevels = [
   { value: 'hard', label: 'Hard' },
 ];
 
-export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionId, parentQuestionText, selectedRoundId }: AddQuestionModalProps) {
-  const { showSuccess } = useToast();
+function normalizeData(data: InterviewQuestionDetails): EditQuestionFormData{
+    return {
+        _id: data._id,
+        question: data.question,
+        type: {
+            type: "existing",
+            _id: data.questionType._id,
+            name: data.questionType.name
+        },
+        difficulty: data.difficulty,
+        answer: data.answer,
+        notes: data.notes,
+        solved: data.solved,
+        confidenceScore: data.confidenceScore
+    }
+}
+
+export function EditQuestionModal({ isOpen, onClose, questionObj, onSubmit, selectedRoundId }: EditQuestionModalProps) {
   const queryClient = useQueryClient();
-  const createQuestionMutation = useMutation({
-    mutationFn: ({ formData, parentQuestionId, selectedRoundId }: { formData: any; parentQuestionId: string; selectedRoundId: string }) => createQuestion({ data: formData, parentQuestionId, selectedRoundId }),
+  const updateQuestionMutation = useMutation({
+    mutationFn: ({ formData, questionId }: { formData: any; questionId: string }) => updateQuestion({ data: formData, questionId:questionId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['interviewQuestions', selectedRoundId] });
       onClose();
     }
   });
 
-  const [formData, setFormData] = useState<QuestionFormData>({
-    question: '',
-    type: null,
-    difficulty: 'medium',
-    answer: '',
-    notes: '',
-    solved: false,
-    confidenceScore: 3,
-  });
+  const [formData, setFormData] = useState<EditQuestionFormData>(normalizeData(questionObj));
+  useEffect(()=>{
+    setFormData(normalizeData(questionObj));
+  }, [questionObj]);
 
-  const handleChange = (field: keyof QuestionFormData, value: string | boolean | number) => {
+  const handleChange = (field: keyof EditQuestionFormData, value: string | boolean | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.question.trim()) return;
-    await createQuestionMutation.mutateAsync({ formData, parentQuestionId, selectedRoundId });
-    showSuccess('Question added', 'Question added successfully!');
+    await updateQuestionMutation.mutateAsync({ formData, questionId: formData._id });
     onSubmit(formData);
     setFormData({
+    _id: '',
       question: '',
       type: null,
       difficulty: 'medium',
@@ -133,13 +134,8 @@ export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionId, 
               <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">
-                    {parentQuestionText ? 'Add Follow-up Question' : 'Add New Question'}
+                    Edit Question
                   </h2>
-                  {parentQuestionText && (
-                    <p className="text-sm text-gray-500 mt-0.5 truncate max-w-sm">
-                      to: &ldquo;{parentQuestionText.slice(0, 60)} {parentQuestionText.length > 60 ? '...' : ''}&rdquo;
-                    </p>
-                  )}
                 </div>
                 <button
                   onClick={onClose}
@@ -255,7 +251,7 @@ export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionId, 
                   </label>
                   <select
                     id="confidence"
-                    value={formData.confidenceScore}
+                    value={String(formData.confidenceScore)}
                     onChange={(e) => handleChange('confidenceScore', parseInt(e.target.value))}
                     className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 shadow-xs focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all duration-200"
                   >
@@ -284,7 +280,7 @@ export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionId, 
                     className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-medium text-white shadow-xs hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                   >
                     <Save className="h-4 w-4" />
-                    Save Question
+                    Save Chnages
                   </button>
                 </div>
               </form>
