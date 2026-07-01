@@ -69,10 +69,7 @@ export function InterviewDetailsClient({ interviewId }: { interviewId: string })
   const [selectedQuestion4Edit, setSelectedQuestion4Edit] = useState<InterviewQuestionDetails>({
     _id: '',
     question: '',
-    questionType: {
-      _id: '',
-      name: ''
-    },
+    questionType: '',
     difficulty: 'medium',
     answer: '',
     notes: '',
@@ -82,7 +79,15 @@ export function InterviewDetailsClient({ interviewId }: { interviewId: string })
     parentQuestion: null,
     round: '',
     sequence: '',
-    followUps: []
+    followUps: [],
+    topic: {
+      _id: '',
+      name: '',
+    },
+    subTopic: {
+      _id: '',
+      name: '',
+    }
   });
   const [showAddRoundModal, setShowAddRoundModal] = useState(false);
   const [parentQuestionId, setParentQuestionId] = useState<string | null>(null);
@@ -168,7 +173,12 @@ export function InterviewDetailsClient({ interviewId }: { interviewId: string })
     setSelectedQuestion4Edit({
       _id: '',
       question: '',
-      questionType: {
+      questionType: '',
+      topic: {
+        _id: '',
+        name: ''
+      },
+      subTopic: {
         _id: '',
         name: ''
       },
@@ -215,11 +225,11 @@ export function InterviewDetailsClient({ interviewId }: { interviewId: string })
 
   const filteredQuestions = currentQuestions.filter((q) => {
     const matchesSearch = q.question.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterType === 'all' || q.questionType.name === filterType;
+    const matchesFilter = filterType === 'all' || q.questionType === filterType;
     return matchesSearch && matchesFilter;
   });
 
-  const questionTypes = ['all', ...new Set(currentQuestions.map((q) => q.questionType.name))];
+  const questionTypes = ['all', ...new Set(currentQuestions.map((q) => q.questionType))];
 
   return (
     <div className="space-y-6 sm:space-y-8">

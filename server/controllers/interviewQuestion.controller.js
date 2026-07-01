@@ -1,17 +1,19 @@
-import QuestionType from '../models/QuestionType.js';
 import Question from '../models/Question.js';
-import QuestionTypeHelper from '../helpers/questionType.helper.js';
+import QuestionTopicHelper from '../helpers/questionTopic.helper.js';
+import QuestionSubTopicHelper from '../helpers/questionSubTopic.helper.js';
 import mongoose from 'mongoose';
+import QuestionTopic from '../models/QuestionTopic.js';
+import QuestionSubTopic from '../models/QuestionSubTopic.js';
 
-export const createQuestionType = async (req, res) => {
+export const createTopic = async (req, res) => {
     try {
         const { name, description } = req.body;
-        const questionType = new QuestionType({ name, description });
-        await questionType.save();
+        const questionTopic = new QuestionTopic({ name, description });
+        await questionTopic.save();
         res.status(201).json({
             code: 'SUCCESS',
-            message: 'Question type created successfully',
-            data: questionType
+            message: 'Topic created successfully',
+            data: questionTopic
         });
     } catch (error) {
         res.status(400).json({
@@ -21,7 +23,7 @@ export const createQuestionType = async (req, res) => {
     }
 };
 
-export const searchQuestionType = async (req, res) => {
+export const searchTopic = async (req, res) => {
     const { query } = req.query;
     if (!query || query.trim().length < 2) {
         return res.status(200).json({
@@ -32,11 +34,11 @@ export const searchQuestionType = async (req, res) => {
     }
     try {
         const regex = new RegExp(query.toLowerCase().trim().replace(/\s+/g, " "), "i");
-        const questionTypes = await QuestionType.find({ normalizedName: regex }).select("_id name description").limit(10);
+        const questionTopics = await QuestionTopic.find({ normalizedName: regex }).select("_id name description").limit(10);
         res.status(200).json({
             code: 'SUCCESS',
-            message: 'Question types found',
-            data: questionTypes
+            message: 'Topics found',
+            data: questionTopics
         });
     } catch (error) {
         res.status(500).json({
@@ -46,11 +48,54 @@ export const searchQuestionType = async (req, res) => {
     }
 }
 
+export const createSubTopic = async (req, res) => {
+    try {
+        const { name, description } = req.body;
+        const questionSubTopic = new QuestionSubTopic({ name, description });
+        await questionSubTopic.save();
+        res.status(201).json({
+            code: 'SUCCESS',
+            message: 'Subtopic created successfully',
+            data: questionSubTopic
+        });
+    } catch (error) {
+        res.status(400).json({
+            code: 'ERROR',
+            message: error.message
+        });
+    }
+};
+
+export const searchSubTopic = async (req, res) => {
+    const { query } = req.query;
+    if (!query || query.trim().length < 2) {
+        return res.status(200).json({
+            code: 'SUCCESS',
+            message: 'Query too short, returning empty results',
+            data: []
+        });
+    }
+    try {
+        const regex = new RegExp(query.toLowerCase().trim().replace(/\s+/g, " "), "i");
+        const questionSubTopics = await QuestionSubTopic.find({ normalizedName: regex }).select("_id name description").limit(10);
+        res.status(200).json({
+            code: 'SUCCESS',
+            message: 'SubTopics found',
+            data: questionSubTopics
+        });
+    } catch (error) {
+        res.status(500).json({
+            code: 'ERROR',
+            message: error.message
+        });
+    }
+}
 
 export const createQuestion = async (req, res) => {
     try {
-        const { round, parentQuestion, question, type, difficulty, answer, notes, solved, confidenceScore } = req.body;
-        const questionType = await QuestionTypeHelper(type);
+        const { round, parentQuestion, question, type, difficulty, answer, notes, solved, confidenceScore, topic, subTopic } = req.body;
+        const topicObj = await QuestionTopicHelper(topic);
+        const subTopicObj = await QuestionSubTopicHelper(subTopic);
 
         const depth = parentQuestion ? (await Question.findById(parentQuestion)).depth + 1 : 1;
         let sequence = "1";
@@ -73,14 +118,16 @@ export const createQuestion = async (req, res) => {
             round,
             parentQuestion: parentQuestion || null,
             question,
-            questionType: questionType._id,
+            questionType: type,
             difficulty,
             answer,
             notes,
             solved,
             confidenceScore,
             depth,
-            sequence: `${sequence}`
+            sequence: `${sequence}`,
+            topic: topicObj._id,
+            subTopic: subTopicObj._id
         });
 
         await newQuestion.save();
@@ -88,7 +135,7 @@ export const createQuestion = async (req, res) => {
         res.status(201).json({
             code: 'SUCCESS',
             message: 'Question created successfully',
-            data: { ...newQuestion._doc, questionType, followUps: [] }
+            data: { ...newQuestion._doc, followUps: [] }
         });
 
     } catch (error) {
@@ -102,7 +149,10 @@ export const createQuestion = async (req, res) => {
 export const getQuestionsByRound = async (req, res) => {
     const { round } = req.params;
     try {
-        const questions = await Question.find({ round }).populate('questionType', 'name description').sort({ sequence: 1 });
+        const questions = await Question.find({ round }).populate([
+            { path: 'topic', select: 'name description' },
+            { path: 'subTopic', select: 'name description' }
+        ]).sort({ sequence: 1 });
         const questionMap = {};
 
         questions.forEach(q => {

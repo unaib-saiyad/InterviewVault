@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const questionTypeSchema = new mongoose.Schema({
+const questionSubTopicSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -14,11 +14,10 @@ const questionTypeSchema = new mongoose.Schema({
   },
 
   description: String,
+},
+{ timestamps: true });
 
-  icon: String,
-});
-
-questionTypeSchema.pre("validate", async function () {
+questionSubTopicSchema.pre("validate", async function () {
     if (this.name) {
         this.normalizedName = this.name
             .trim()
@@ -28,6 +27,6 @@ questionTypeSchema.pre("validate", async function () {
 });
 
 export default mongoose.model(
-  "QuestionType",
-  questionTypeSchema
+  "QuestionSubTopic",
+  questionSubTopicSchema
 );

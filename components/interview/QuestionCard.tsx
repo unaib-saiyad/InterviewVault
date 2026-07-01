@@ -41,9 +41,9 @@ export function QuestionCard({
   const queryClient = useQueryClient();
   const { showSuccess } = useToast();
   const deleteQuestionMutation = useMutation({
-    mutationFn: (questionId: string)=> deleteQuestion(questionId),
-    onSuccess: () =>{
-      queryClient.invalidateQueries({ queryKey: [ 'interviewQuestions', roundId ] });
+    mutationFn: (questionId: string) => deleteQuestion(questionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['interviewQuestions', roundId] });
       showSuccess("Question Deleted", "Question deleted successfully...");
     }
 
@@ -55,7 +55,7 @@ export function QuestionCard({
 
   const children = question.followUps;
 
-  const handleDelete = async(questionId: string)=>{
+  const handleDelete = async (questionId: string) => {
     if (confirm('Are you sure you want to delete this question? This action cannot be undone.')) {
       deleteQuestionMutation.mutate(questionId);
     }
@@ -90,7 +90,7 @@ export function QuestionCard({
           {/* Top row - badges and actions */}
           <div className="flex items-start justify-between gap-3 mb-2">
             <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-              <QuestionTypeBadge type={question.questionType.name} />
+              <QuestionTypeBadge type={question.questionType} />
               <DifficultyBadge difficulty={question.difficulty} />
               {question.solved ? (
                 <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-xs font-medium text-emerald-700">
@@ -142,6 +142,20 @@ export function QuestionCard({
               </button>
             </div>
           </div>
+          
+          <nav className="flex text-gray-600 text-xs" aria-label="Breadcrumb">
+            <ol className="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+              <li className="inline-flex items-center">
+                {question.topic.name}
+              </li>
+              <li aria-current="page">
+                <div className="flex items-center space-x-1.5">
+                  <svg className="w-3.5 h-3.5 rtl:rotate-180 text-body" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m9 5 7 7-7 7" /></svg>
+                  <span className="inline-flex items-center text-sm font-medium text-body-subtle ">{question.subTopic.name}</span>
+                </div>
+              </li>
+            </ol>
+          </nav>
 
           {/* Question text */}
           <p className="text-sm sm:text-base font-medium text-gray-900 leading-relaxed mb-2">

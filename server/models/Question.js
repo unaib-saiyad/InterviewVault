@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "node:os";
 
 const questionSchema = new mongoose.Schema(
   {
@@ -25,12 +26,21 @@ const questionSchema = new mongoose.Schema(
     },
 
     questionType: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "QuestionType",
+      type: String,
       required: true
     },
 
-    // topic: String, Must be implement
+    topic: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "QuestionTopic",
+      required: true
+    },
+
+    subTopic: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "QuestionSubTopic",
+      required: true
+    },
 
     difficulty: {
       type: String,

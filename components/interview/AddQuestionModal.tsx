@@ -4,11 +4,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import QuestionTypeSelector from './QuestionTypeSelector';
-import type { QuestionTypeOption } from '@/types/questionTypes';
+import type { QuestionTypeValue, TopicOption, SubTopicOption } from '@/types/questionTypes';
 import { createQuestion } from '@/lib/questionApi';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/useToast';
+import TopicSelector from './TopicSelector';
+import SubTopicSelector from './SubTopicSelector';
 
 type AddQuestionModalProps = {
   isOpen: boolean;
@@ -21,12 +22,14 @@ type AddQuestionModalProps = {
 
 export type QuestionFormData = {
   question: string;
-  type: QuestionTypeOption | null;
+  type: QuestionTypeValue;
   difficulty: string;
   answer: string;
   notes: string;
   solved: boolean;
   confidenceScore?: 1 | 2 | 3 | 4 | 5;
+  topic: TopicOption | null;
+  subTopic: SubTopicOption | null;
 };
 
 const questionTypes = [
@@ -34,8 +37,12 @@ const questionTypes = [
   { value: 'behavioral', label: 'Behavioral' },
   { value: 'system_design', label: 'System Design' },
   { value: 'coding', label: 'Coding' },
-  { value: 'dsa', label: 'DSA' },
   { value: 'hr', label: 'HR' },
+  { value: 'dsa', label: 'DSA' },
+  { value: 'situational', label: 'Situational' },
+  { value: 'cultural', label: 'Cultural' },
+  { value: 'brain_storming', label: 'Brain Storming' },
+  { value: 'others', label: 'Others' },
 ];
 
 const difficultyLevels = [
@@ -57,12 +64,14 @@ export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionId, 
 
   const [formData, setFormData] = useState<QuestionFormData>({
     question: '',
-    type: null,
+    type: 'technical',
     difficulty: 'medium',
     answer: '',
     notes: '',
     solved: false,
     confidenceScore: 3,
+    topic: null,
+    subTopic: null
   });
 
   const handleChange = (field: keyof QuestionFormData, value: string | boolean | number) => {
@@ -77,13 +86,23 @@ export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionId, 
     onSubmit(formData);
     setFormData({
       question: '',
-      type: null,
+      type: 'technical',
       difficulty: 'medium',
       answer: '',
       notes: '',
       solved: false,
       confidenceScore: 3,
+      topic: null,
+      subTopic: null
     });
+  };
+
+  const handleTopicChange = (topic: TopicOption) => {
+    setFormData((prev) => ({ ...prev, topic, subTopic: null }));
+  };
+
+  const handleSubTopicChange = (subTopic: SubTopicOption) => {
+    setFormData((prev) => ({ ...prev, subTopic }));
   };
 
   // Handle escape key
@@ -169,10 +188,23 @@ export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionId, 
 
                 {/* Type and Difficulty */}
                 <div className="grid grid-cols-2 gap-4">
-                  <QuestionTypeSelector
-                    value={formData.type}
-                    onChange={(type) => setFormData((prev) => ({ ...prev, type }))}
-                  />
+                  <div>
+                    <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Type
+                    </label>
+                    <select
+                      id="type"
+                      value={formData.type}
+                      onChange={(e) => handleChange('type', e.target.value)}
+                      className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-xs focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all duration-200"
+                    >
+                      {questionTypes.map((d) => (
+                        <option key={d.value} value={d.value}>
+                          {d.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div>
                     <label htmlFor="difficulty" className="block text-sm font-medium text-gray-700 mb-1.5">
                       Difficulty
@@ -191,7 +223,18 @@ export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionId, 
                     </select>
                   </div>
                 </div>
+                {/* Topic and SubTopic */}
+                <div className="grid grid-cols-2 gap-4">
+                  <TopicSelector
+                    value={formData.topic}
+                    onChange={handleTopicChange}
+                  />
 
+                  <SubTopicSelector
+                    value={formData.subTopic}
+                    onChange={handleSubTopicChange}
+                  />
+                </div>
                 {/* Answer */}
                 <div>
                   <label htmlFor="answer" className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -204,7 +247,7 @@ export function AddQuestionModal({ isOpen, onClose, onSubmit, parentQuestionId, 
                     onChange={(e) => handleChange('answer', e.target.value)}
                     placeholder="Write the ideal answer or solution..."
                     className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 shadow-xs focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all duration-200 resize-none"
-                      required
+                    required
                   />
                 </div>
 

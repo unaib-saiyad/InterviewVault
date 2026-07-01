@@ -4,11 +4,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import QuestionTypeSelector from './QuestionTypeSelector';
-import type { QuestionTypeOption } from '@/types/questionTypes';
 import { updateQuestion } from '@/lib/questionApi';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { InterviewQuestionDetails } from '@/types/questionTypes';
+import TopicSelector from './TopicSelector';
+import SubTopicSelector from './SubTopicSelector';
+import type { InterviewQuestionDetails, TopicOption, SubTopicOption, QuestionTypeValue } from '@/types/questionTypes';
 type EditQuestionModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -16,16 +16,29 @@ type EditQuestionModalProps = {
   onSubmit: (data: EditQuestionFormData) => void;
   selectedRoundId: string;
 };
-
+const questionTypes = [
+  { value: 'technical', label: 'Technical' },
+  { value: 'behavioral', label: 'Behavioral' },
+  { value: 'system_design', label: 'System Design' },
+  { value: 'coding', label: 'Coding' },
+  { value: 'hr', label: 'HR' },
+  { value: 'dsa', label: 'DSA' },
+  { value: 'situational', label: 'Situational' },
+  { value: 'cultural', label: 'Cultural' },
+  { value: 'brain_storming', label: 'Brain Storming' },
+  { value: 'others', label: 'Others' },
+];
 export type EditQuestionFormData = {
   _id: string;
   question: string;
-  type: QuestionTypeOption | null;
+  type: QuestionTypeValue;
   difficulty: string;
   answer: string;
   notes: string;
   solved: boolean;
   confidenceScore: Number;
+  topic: TopicOption | null;
+  subTopic: SubTopicOption | null;
 };
 
 const difficultyLevels = [
@@ -34,27 +47,31 @@ const difficultyLevels = [
   { value: 'hard', label: 'Hard' },
 ];
 
-function normalizeData(data: InterviewQuestionDetails): EditQuestionFormData{
-    return {
-        _id: data._id,
-        question: data.question,
-        type: {
-            type: "existing",
-            _id: data.questionType._id,
-            name: data.questionType.name
-        },
-        difficulty: data.difficulty,
-        answer: data.answer,
-        notes: data.notes,
-        solved: data.solved,
-        confidenceScore: data.confidenceScore
+function normalizeData(data: InterviewQuestionDetails): EditQuestionFormData {
+  return {
+    _id: data._id,
+    question: data.question,
+    type: data.questionType as QuestionTypeValue,
+    difficulty: data.difficulty,
+    answer: data.answer,
+    notes: data.notes,
+    solved: data.solved,
+    confidenceScore: data.confidenceScore,
+    topic: {
+      type: 'existing',
+      ...data.topic
+    },
+    subTopic: {
+      type: 'existing',
+      ...data.subTopic
     }
+  }
 }
 
 export function EditQuestionModal({ isOpen, onClose, questionObj, onSubmit, selectedRoundId }: EditQuestionModalProps) {
   const queryClient = useQueryClient();
   const updateQuestionMutation = useMutation({
-    mutationFn: ({ formData, questionId }: { formData: any; questionId: string }) => updateQuestion({ data: formData, questionId:questionId }),
+    mutationFn: ({ formData, questionId }: { formData: any; questionId: string }) => updateQuestion({ data: formData, questionId: questionId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['interviewQuestions', selectedRoundId] });
       onClose();
@@ -62,7 +79,7 @@ export function EditQuestionModal({ isOpen, onClose, questionObj, onSubmit, sele
   });
 
   const [formData, setFormData] = useState<EditQuestionFormData>(normalizeData(questionObj));
-  useEffect(()=>{
+  useEffect(() => {
     setFormData(normalizeData(questionObj));
   }, [questionObj]);
 
@@ -76,14 +93,16 @@ export function EditQuestionModal({ isOpen, onClose, questionObj, onSubmit, sele
     await updateQuestionMutation.mutateAsync({ formData, questionId: formData._id });
     onSubmit(formData);
     setFormData({
-    _id: '',
+      _id: '',
       question: '',
-      type: null,
+      type: 'technical',
       difficulty: 'medium',
       answer: '',
       notes: '',
       solved: false,
       confidenceScore: 3,
+      topic: null,
+      subTopic: null,
     });
   };
 
@@ -106,6 +125,14 @@ export function EditQuestionModal({ isOpen, onClose, questionObj, onSubmit, sele
     };
   }, [isOpen, handleKeyDown]);
 
+  
+    const handleTopicChange = (topic: TopicOption) => {
+      setFormData((prev) => ({ ...prev, topic, subTopic: null }));
+    };
+  
+    const handleSubTopicChange = (subTopic: SubTopicOption) => {
+      setFormData((prev) => ({ ...prev, subTopic }));
+    };
 
   return (
     <AnimatePresence>
@@ -165,10 +192,23 @@ export function EditQuestionModal({ isOpen, onClose, questionObj, onSubmit, sele
 
                 {/* Type and Difficulty */}
                 <div className="grid grid-cols-2 gap-4">
-                  <QuestionTypeSelector
-                    value={formData.type}
-                    onChange={(type) => setFormData((prev) => ({ ...prev, type }))}
-                  />
+                  <div>
+                    <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Type
+                    </label>
+                    <select
+                      id="type"
+                      value={formData.type}
+                      onChange={(e) => handleChange('type', e.target.value)}
+                      className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-xs focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all duration-200"
+                    >
+                      {questionTypes.map((d) => (
+                        <option key={d.value} value={d.value}>
+                          {d.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div>
                     <label htmlFor="difficulty" className="block text-sm font-medium text-gray-700 mb-1.5">
                       Difficulty
@@ -188,6 +228,19 @@ export function EditQuestionModal({ isOpen, onClose, questionObj, onSubmit, sele
                   </div>
                 </div>
 
+                {/* Topic and SubTopic */}
+                <div className="grid grid-cols-2 gap-4">
+                  <TopicSelector
+                    value={formData.topic}
+                    onChange={handleTopicChange}
+                  />
+
+                  <SubTopicSelector
+                    value={formData.subTopic}
+                    onChange={handleSubTopicChange}
+                  />
+                </div>
+
                 {/* Answer */}
                 <div>
                   <label htmlFor="answer" className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -200,7 +253,7 @@ export function EditQuestionModal({ isOpen, onClose, questionObj, onSubmit, sele
                     onChange={(e) => handleChange('answer', e.target.value)}
                     placeholder="Write the ideal answer or solution..."
                     className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 shadow-xs focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all duration-200 resize-none"
-                      required
+                    required
                   />
                 </div>
 

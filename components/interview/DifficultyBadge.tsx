@@ -53,8 +53,12 @@ const questionTypeConfig: Record<string, { label: string; className: string }> =
   coding: { label: 'Coding', className: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
   hr: { label: 'HR', className: 'bg-pink-50 text-pink-700 border-pink-200' },
   dsa: { label: 'DSA', className: 'bg-orange-50 text-orange-700 border-orange-200' },
+  situational: { label: 'Situational', className: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+  cultural: { label: 'Cultural', className: 'bg-green-50 text-green-700 border-green-200' },
+  brain_storming: { label: 'Brain Storming', className: 'bg-blue-50 text-blue-700 border-blue-200' },
+  others: { label: 'Others', className: 'bg-gray-50 text-gray-700 border-gray-200' },
 };
-
+ 
 export function QuestionTypeBadge({ type }: { type: string }) {
   const config = questionTypeConfig[type] || { label: type, className: 'bg-gray-50 text-gray-700 border-gray-200' };
 
